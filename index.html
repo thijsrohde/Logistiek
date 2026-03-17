@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Voorraad Beheer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-body:'Inter','Helvetica Neue',sans-serif;
+  --text-xs:clamp(0.75rem,0.7rem + 0.25vw,0.875rem);
+  --text-sm:clamp(0.8125rem,0.78rem + 0.2vw,0.9375rem);
+  --text-base:clamp(0.9375rem,0.9rem + 0.2vw,1rem);
+  --text-lg:clamp(1rem,0.95rem + 0.3vw,1.125rem);
+  --space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1rem;
+  --space-5:1.25rem;--space-6:1.5rem;--space-8:2rem;--space-10:2.5rem;
+  --radius-sm:4px;--radius-md:6px;--radius-lg:8px;--radius-xl:12px;--radius-full:9999px;
+  --transition:150ms cubic-bezier(0.16,1,0.3,1);
+}
+:root,[data-theme="light"]{
+  --bg:#f4f5f7;--surface:#ffffff;--surface-2:#f8f9fa;--surface-offset:#eef0f3;
+  --border:rgba(0,0,0,.1);--divider:rgba(0,0,0,.07);
+  --text:#111827;--text-2:#4b5563;--text-3:#9ca3af;--text-inv:#ffffff;
+  --primary:#1d6db5;--primary-h:#155fa0;--primary-hi:rgba(29,109,181,.1);
+  --success:#186b3a;--success-h:#0f5530;--success-hi:rgba(24,107,58,.1);
+  --danger:#c0392b;--danger-h:#a93226;--danger-hi:rgba(192,57,43,.1);
+  --warn:#b45309;--warn-hi:rgba(180,83,9,.1);
+  --badge-ja-bg:#fee2e2;--badge-ja-text:#991b1b;
+  --badge-nee-bg:#dcfce7;--badge-nee-text:#166534;
+  --sh-sm:0 1px 3px rgba(0,0,0,.07),0 1px 2px rgba(0,0,0,.05);
+  --sh-md:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.05);
+  --sh-lg:0 10px 24px rgba(0,0,0,.1),0 4px 8px rgba(0,0,0,.06);
+}
+[data-theme="dark"]{
+  --bg:#0f1117;--surface:#1a1d27;--surface-2:#20232f;--surface-offset:#252838;
+  --border:rgba(255,255,255,.08);--divider:rgba(255,255,255,.05);
+  --text:#e5e7eb;--text-2:#9ca3af;--text-3:#4b5563;--text-inv:#0f1117;
+  --primary:#4da3e8;--primary-h:#60b3f5;--primary-hi:rgba(77,163,232,.12);
+  --success:#4ade80;--success-h:#22c55e;--success-hi:rgba(74,222,128,.1);
+  --danger:#f87171;--danger-h:#ef4444;--danger-hi:rgba(248,113,113,.1);
+  --warn:#fbbf24;--warn-hi:rgba(251,191,36,.1);
+  --badge-ja-bg:rgba(248,113,113,.15);--badge-ja-text:#fca5a5;
+  --badge-nee-bg:rgba(74,222,128,.15);--badge-nee-text:#86efac;
+  --sh-sm:0 1px 3px rgba(0,0,0,.3);--sh-md:0 4px 8px rgba(0,0,0,.4);--sh-lg:0 10px 24px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:var(--font-body);font-size:var(--text-base);color:var(--text);
+     background:var(--bg);min-height:100dvh;line-height:1.5}
+img,svg{display:block;max-width:100%}
+button{cursor:pointer;border:none;background:none;font:inherit;color:inherit}
+input,select{font:inherit;color:inherit}
+table{border-collapse:collapse;width:100%}
+
+/* ── TOPBAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:var(--surface);
+  border-bottom:1px solid var(--border);padding:0 var(--space-6);
+  height:52px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:var(--sh-sm)}
+.topbar-left{display:flex;align-items:center;gap:var(--space-4)}
+.topbar-right{display:flex;align-items:center;gap:var(--space-3)}
+.logo{display:flex;align-items:center;gap:var(--space-2);font-weight:700;
+  font-size:var(--text-base);letter-spacing:-.01em;color:var(--text)}
+.logo svg{color:var(--primary)}
+.user-badge{display:flex;align-items:center;gap:var(--space-2);
+  padding:var(--space-1) var(--space-3);border-radius:var(--radius-full);
+  background:var(--primary-hi);font-size:var(--text-xs);font-weight:600;
+  color:var(--primary);letter-spacing:.02em}
+.btn-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:var(--radius-md);color:var(--text-2);transition:background var(--transition),color var(--transition)}
+.btn-icon:hover{background:var(--surface-offset);color:var(--text)}
+.back-btn{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-sm);
+  font-weight:500;color:var(--text-2);padding:var(--space-1) var(--space-2);
+  border-radius:var(--radius-md);transition:background var(--transition),color var(--transition)}
+.back-btn:hover{background:var(--surface-offset);color:var(--text)}
+.back-btn svg{width:14px;height:14px}
+
+/* ── NOTIFICATION BELL ── */
+.notif-wrap{position:relative}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;
+  background:var(--danger);border-radius:50%;border:2px solid var(--surface);display:none}
+.notif-dot.on{display:block}
+.notif-panel{display:none;position:absolute;top:calc(100% + 8px);right:0;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  box-shadow:var(--sh-lg);width:320px;z-index:200;overflow:hidden}
+.notif-panel.on{display:block}
+.notif-header{padding:var(--space-4) var(--space-5);border-bottom:1px solid var(--divider);
+  display:flex;align-items:center;justify-content:space-between}
+.notif-header h4{font-size:var(--text-sm);font-weight:600}
+.notif-clear{font-size:var(--text-xs);color:var(--primary);cursor:pointer;font-weight:500}
+.notif-clear:hover{text-decoration:underline}
+.notif-list{max-height:280px;overflow-y:auto}
+.notif-item{padding:var(--space-3) var(--space-5);border-bottom:1px solid var(--divider);
+  font-size:var(--text-xs)}
+.notif-item:last-child{border-bottom:none}
+.notif-item-title{font-weight:600;color:var(--text);margin-bottom:2px}
+.notif-item-sub{color:var(--text-2)}
+.notif-empty{padding:var(--space-6) var(--space-5);text-align:center;color:var(--text-3);font-size:var(--text-xs)}
+
+/* ── LAYOUT ── */
+.page-wrap{padding:var(--space-6);max-width:1480px;margin:0 auto}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border-radius:var(--radius-xl);
+  border:1px solid var(--border);box-shadow:var(--sh-sm)}
+.card-pad{padding:var(--space-6)}
+
+/* ── PAGE TITLE ── */
+.page-header{margin-bottom:var(--space-6)}
+.page-header h1{font-size:var(--text-lg);font-weight:700;margin-bottom:2px}
+.page-header p{font-size:var(--text-xs);color:var(--text-2)}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-4);margin-bottom:var(--space-6)}
+.stat-card{background:var(--surface);border-radius:var(--radius-xl);border:1px solid var(--border);
+  padding:var(--space-5);box-shadow:var(--sh-sm)}
+.stat-n{font-size:28px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;line-height:1}
+.stat-l{font-size:var(--text-xs);color:var(--text-2);margin-top:var(--space-1);
+  text-transform:uppercase;letter-spacing:.05em;font-weight:500}
+
+/* ── TABS ── */
+.tabs-bar{display:flex;gap:2px;background:var(--surface-offset);
+  padding:4px;border-radius:var(--radius-lg);margin-bottom:var(--space-5);
+  border:1px solid var(--border);width:fit-content}
+.tab{padding:7px 18px;border-radius:var(--radius-md);font-size:var(--text-sm);
+  font-weight:500;color:var(--text-2);transition:all var(--transition);white-space:nowrap;cursor:pointer}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:var(--sh-sm);font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* ── ADD FORM ── */
+.add-form{background:var(--surface);border-radius:var(--radius-xl);border:1px solid var(--border);
+  padding:var(--space-6);margin-bottom:var(--space-5);box-shadow:var(--sh-sm)}
+.form-title{font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-5);
+  color:var(--text);display:flex;align-items:center;gap:var(--space-2)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:var(--space-4);margin-bottom:var(--space-5)}
+.fg{display:flex;flex-direction:column;position:relative}
+label{font-size:var(--text-xs);font-weight:600;margin-bottom:5px;color:var(--text-2);
+  text-transform:uppercase;letter-spacing:.04em}
+.req{color:var(--danger);margin-left:2px}
+input[type=text],input[type=date],input[type=number],select{
+  padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius-md);
+  font-size:var(--text-sm);color:var(--text);background:var(--surface);
+  transition:border-color var(--transition),box-shadow var(--transition);width:100%;
+  outline:none}
+input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-hi)}
+.fg.valid input,.fg.valid select{border-color:var(--success);box-shadow:0 0 0 2px var(--success-hi);padding-right:28px}
+.fg.invalid input,.fg.invalid select{border-color:var(--danger);box-shadow:0 0 0 2px var(--danger-hi)}
+.vcheck{position:absolute;right:9px;bottom:10px;color:var(--success);font-size:12px;display:none;pointer-events:none}
+.fg.valid .vcheck{display:block}
+.ferr{font-size:11px;color:var(--danger);margin-top:3px;display:none}
+.fg.invalid .ferr{display:block}
+select.gem-sel option[value=Ja]{color:#991b1b;font-weight:600}
+select.gem-sel option[value=Nee]{color:#166534;font-weight:600}
+select.gem-ja{color:var(--badge-ja-text)!important;font-weight:600!important}
+select.gem-nee{color:var(--badge-nee-text)!important;font-weight:600!important}
+
+/* ── FILE UPLOAD ── */
+.file-drop{border:1.5px dashed var(--border);border-radius:var(--radius-md);
+  padding:9px 12px;cursor:pointer;transition:border-color var(--transition),background var(--transition)}
+.file-drop:hover{border-color:var(--primary);background:var(--primary-hi)}
+.file-label{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);cursor:pointer}
+input[type=file]{display:none}
+.foto-thumbs{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.fthumb{position:relative;width:52px;height:52px}
+.fthumb img{width:52px;height:52px;object-fit:cover;border-radius:var(--radius-md);
+  border:1px solid var(--border)}
+.fthumb-rm{position:absolute;top:-5px;right:-5px;width:16px;height:16px;
+  background:var(--danger);color:#fff;border-radius:50%;font-size:10px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border:2px solid var(--surface)}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;
+  cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;
+  transition:all var(--transition);white-space:nowrap}
+.btn-primary{background:var(--primary);color:var(--text-inv)}
+.btn-primary:hover{background:var(--primary-h)}
+.btn-success{background:var(--success);color:var(--text-inv);padding:6px 14px;font-size:var(--text-xs)}
+.btn-success:hover{background:var(--success-h)}
+.btn-secondary{background:var(--surface-offset);color:var(--text);border:1px solid var(--border);padding:6px 14px;font-size:var(--text-xs)}
+.btn-secondary:hover{background:var(--surface-2)}
+.btn-retour{background:var(--surface-offset);color:var(--text-2);border:1px solid var(--border);padding:6px 14px;font-size:var(--text-xs)}
+.btn-retour:hover{background:var(--surface-2);color:var(--text)}
+.btn-ghost{background:transparent;color:var(--text-2);padding:6px 12px;font-size:var(--text-xs)}
+.btn-ghost:hover{background:var(--surface-offset);color:var(--text)}
+
+/* ── TABLE ── */
+.table-card{background:var(--surface);border-radius:var(--radius-xl);
+  border:1px solid var(--border);box-shadow:var(--sh-sm);overflow:hidden}
+.table-scroll{overflow-x:auto}
+th{background:var(--surface-2);padding:9px 14px;text-align:left;
+  font-size:11px;font-weight:600;color:var(--text-2);
+  border-bottom:1px solid var(--border);white-space:nowrap;
+  text-transform:uppercase;letter-spacing:.04em;user-select:none}
+td{padding:9px 14px;border-bottom:1px solid var(--divider);font-size:var(--text-xs);
+  color:var(--text);vertical-align:middle}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background var(--transition);cursor:default}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr.row-sel{background:var(--primary-hi)}
+.filter-r td{padding:5px 10px;background:var(--surface-offset)}
+.filter-r input{padding:5px 8px;font-size:12px;border-radius:var(--radius-sm)}
+.cb-cell{width:40px;text-align:center;padding-left:var(--space-3)!important}
+input[type=checkbox]{width:15px;height:15px;cursor:pointer;accent-color:var(--primary)}
+
+/* ── BADGES ── */
+.badge{padding:2px 9px;border-radius:var(--radius-full);font-size:11px;font-weight:600;white-space:nowrap}
+.badge-ja{background:var(--badge-ja-bg);color:var(--badge-ja-text)}
+.badge-nee{background:var(--badge-nee-bg);color:var(--badge-nee-text)}
+
+/* ── TABLE FOTOS ── */
+.tfotos{display:flex;gap:3px;flex-wrap:wrap}
+.tthumb{width:40px;height:40px;object-fit:cover;border-radius:var(--radius-md);
+  border:1px solid var(--border);cursor:pointer;transition:transform var(--transition),border-color var(--transition)}
+.tthumb:hover{transform:scale(1.15);border-color:var(--primary)}
+.nofo{font-size:11px;color:var(--text-3)}
+
+/* ── BULK BAR ── */
+.bulk-bar{display:none;background:var(--primary-hi);border:1px solid var(--primary);
+  border-radius:var(--radius-lg);padding:12px var(--space-5);margin-bottom:var(--space-3);
+  align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--space-3)}
+.bulk-bar.on{display:flex}
+.bulk-info{font-size:var(--text-sm);font-weight:600;color:var(--primary)}
+.bulk-btns{display:flex;gap:var(--space-2);flex-wrap:wrap}
+.bbtn{padding:6px 14px;border:1px solid var(--primary);border-radius:var(--radius-md);
+  font-size:var(--text-xs);font-weight:500;color:var(--primary);background:var(--surface);
+  cursor:pointer;transition:all var(--transition)}
+.bbtn:hover{background:var(--primary);color:var(--text-inv)}
+
+/* ── FILTER STATUS ── */
+.filter-status{display:none;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--radius-md);padding:8px var(--space-4);margin-bottom:10px;
+  align-items:center;justify-content:space-between;font-size:var(--text-xs);color:var(--text-2)}
+.filter-status.on{display:flex}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:48px 24px;text-align:center;color:var(--text-3)}
+.empty-state svg{margin:0 auto var(--space-3);opacity:.35}
+.empty-state p{font-size:var(--text-sm);color:var(--text-2)}
+
+/* ── PROJECTS HOME ── */
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-4);margin-top:var(--space-5)}
+.proj-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:var(--space-5);cursor:pointer;box-shadow:var(--sh-sm);
+  transition:box-shadow var(--transition),border-color var(--transition)}
+.proj-card:hover{box-shadow:var(--sh-md);border-color:var(--primary)}
+.proj-card h3{font-size:var(--text-base);font-weight:600;margin-bottom:var(--space-4)}
+.proj-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-3);margin-bottom:var(--space-4)}
+.ps{display:flex;flex-direction:column;align-items:center;padding:10px;
+  background:var(--surface-offset);border-radius:var(--radius-lg)}
+.ps-n{font-size:22px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums;line-height:1.1}
+.ps-l{font-size:10px;text-transform:uppercase;color:var(--text-2);margin-top:2px;
+  letter-spacing:.04em;font-weight:500}
+.proj-open-btn{width:100%;justify-content:center}
+
+/* ── FOTO MODAL ── */
+.foto-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;
+  align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.foto-modal.on{display:flex}
+.foto-modal img{max-width:90%;max-height:88vh;border-radius:var(--radius-lg);box-shadow:var(--sh-lg)}
+
+/* ── OVERLAY POPUPS ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;
+  align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+.ov.on{display:flex}
+.ov-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:var(--space-8);width:100%;max-width:460px;box-shadow:var(--sh-lg);
+  max-height:90vh;overflow-y:auto}
+.ov-box h3{font-size:var(--text-base);font-weight:700;margin-bottom:4px}
+.ov-box .ov-sub{font-size:var(--text-xs);color:var(--text-2);margin-bottom:var(--space-5)}
+.ov-grid{display:grid;gap:var(--space-4);margin-bottom:var(--space-6)}
+.ov-actions{display:flex;gap:var(--space-3);justify-content:flex-end}
+
+/* ── EDIT POPUP ── */
+.edit-box{max-width:560px}
+.edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin-bottom:var(--space-6)}
+@media(max-width:500px){.edit-grid{grid-template-columns:1fr}}
+
+/* ── LOGIN ── */
+.login-ov{display:flex;position:fixed;inset:0;z-index:900;
+  background:var(--bg);align-items:center;justify-content:center}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:var(--space-8);width:100%;max-width:380px;box-shadow:var(--sh-lg)}
+.login-logo{display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-6)}
+.login-logo svg{color:var(--primary)}
+.login-logo span{font-size:var(--text-base);font-weight:700;letter-spacing:-.01em}
+.login-title{font-size:var(--text-lg);font-weight:700;margin-bottom:4px}
+.login-sub{font-size:var(--text-xs);color:var(--text-2);margin-bottom:var(--space-6)}
+.login-fg{display:flex;flex-direction:column;gap:var(--space-4);margin-bottom:var(--space-5)}
+.login-err{font-size:var(--text-xs);color:var(--danger);margin-top:var(--space-2);display:none}
+.login-err.on{display:block}
+.login-hint{font-size:11px;color:var(--text-3);margin-top:var(--space-4);text-align:center;line-height:1.6}
+
+/* ── CTX MENU ── */
+.ctx-menu{display:none;position:fixed;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);box-shadow:var(--sh-lg);z-index:600;min-width:200px;
+  padding:4px;overflow:hidden}
+.ctx-menu.on{display:block}
+.ctx-item{padding:8px 14px;border-radius:var(--radius-md);font-size:var(--text-xs);
+  color:var(--text);cursor:pointer;transition:background var(--transition)}
+.ctx-item:hover{background:var(--surface-offset)}
+.ctx-item.ctx-danger{color:var(--danger)}
+.ctx-item.ctx-danger:hover{background:var(--danger-hi)}
+.ctx-sep{height:1px;background:var(--divider);margin:3px 0}
+
+/* ── SIDE-USER CALL POPUP ── */
+.call-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:700;
+  align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.call-ov.on{display:flex}
+.call-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);
+  padding:var(--space-8);width:100%;max-width:420px;box-shadow:var(--sh-lg)}
+.call-box h3{font-size:var(--text-base);font-weight:700;margin-bottom:4px}
+.call-box p{font-size:var(--text-xs);color:var(--text-2);margin-bottom:var(--space-5)}
+.call-item-list{background:var(--surface-offset);border-radius:var(--radius-lg);
+  padding:var(--space-4);margin-bottom:var(--space-5);max-height:220px;overflow-y:auto}
+.call-item-row{display:flex;justify-content:space-between;padding:6px 0;
+  border-bottom:1px solid var(--divider);font-size:var(--text-xs)}
+.call-item-row:last-child{border-bottom:none}
+.call-item-name{font-weight:500}
+.call-item-comm{color:var(--text-2)}
+
+/* ── MISC ── */
+.sep{height:1px;background:var(--divider);margin:var(--space-4) 0}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-ov" class="login-ov">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        <path d="M6 8h2M6 11h6"/>
+      </svg>
+      <span>Voorraad Beheer</span>
+    </div>
+    <div class="login-title">Inloggen</div>
+    <div class="login-sub">Voer uw gebruikersnaam en wachtwoord in.</div>
+    <div class="login-fg">
+      <div class="fg">
+        <label>Gebruikersnaam</label>
+        <input type="text" id="lu" placeholder="001 of 002" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Wachtwoord</label>
+        <input type="password" id="lp" placeholder="••••••" autocomplete="off"
+          onkeypress="if(event.key==='Enter')doLogin()">
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Inloggen</button>
+    <div id="login-err" class="login-err">Gebruikersnaam of wachtwoord onjuist.</div>
+    <div class="login-hint">Gebruik 001/001 voor volledige toegang<br>Gebruik 002/002 voor afroepen</div>
+  </div>
+</div>
+
+<!-- ══ TOPBAR ══ -->
+<header class="topbar" id="topbar" style="display:none">
+  <div class="topbar-left">
+    <button class="back-btn" id="back-btn" style="display:none" onclick="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Projecten
+    </button>
+    <div class="logo">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
+        <path d="M6 8h2M6 11h6"/>
+      </svg>
+      <span id="topbar-title">Voorraad Beheer</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="user-badge" id="user-badge"></div>
+    <!-- Only visible for main user -->
+    <div class="notif-wrap" id="notif-wrap" style="display:none">
+      <button class="btn-icon" onclick="toggleNotif()" aria-label="Notificaties">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notif-dot" id="notif-dot"></span>
+      </button>
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-header">
+          <h4>Afroep verzoeken</h4>
+          <span class="notif-clear" onclick="clearNotifs()">Alles wissen</span>
+        </div>
+        <div class="notif-list" id="notif-list"></div>
+      </div>
+    </div>
+    <button class="btn-icon" onclick="doLogout()" aria-label="Uitloggen" title="Uitloggen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+    <button class="btn-icon" data-theme-toggle aria-label="Thema wisselen">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<!-- ══ HOME ══ -->
+<div id="home-view" style="display:none">
+  <div class="page-wrap">
+    <div class="page-header">
+      <h1>Projecten</h1>
+      <p>Selecteer een project om de voorraad te beheren</p>
+    </div>
+    <div class="add-form" id="home-add-form">
+      <div class="form-title">Nieuw project toevoegen</div>
+      <div style="display:flex;gap:var(--space-3);align-items:flex-end">
+        <div class="fg" style="flex:1">
+          <label>Projectnaam <span class="req">*</span></label>
+          <input type="text" id="pname-in" placeholder="Bijv. Energiecentrale A" onkeypress="if(event.key==='Enter')addProject()">
+        </div>
+        <button class="btn btn-primary" onclick="addProject()">Toevoegen</button>
+      </div>
+    </div>
+    <div class="proj-grid" id="proj-grid"></div>
+  </div>
+</div>
+
+<!-- ══ PROJECT VIEW ══ -->
+<div id="proj-view" style="display:none">
+  <div class="page-wrap">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--space-5)">
+      <div>
+        <h1 style="font-size:var(--text-lg);font-weight:700" id="proj-title"></h1>
+        <p style="font-size:var(--text-xs);color:var(--text-2)" id="proj-sub"></p>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-n" id="sn-b">0</div><div class="stat-l">Besteld</div></div>
+      <div class="stat-card"><div class="stat-n" id="sn-l">0</div><div class="stat-l">Bij Leverancier</div></div>
+      <div class="stat-card"><div class="stat-n" id="sn-o">0</div><div class="stat-l">On Site</div></div>
+    </div>
+    <div class="tabs-bar">
+      <button class="tab active" onclick="switchTab('besteld',this)">Voorraad Besteld</button>
+      <button class="tab" onclick="switchTab('leverancier',this)">Voorraad Leverancier</button>
+      <button class="tab" onclick="switchTab('onsite',this)">Voorraad On Site</button>
+    </div>
+
+    <!-- TAB BESTELD -->
+    <div id="tab-besteld" class="tab-content active">
+      <div class="add-form main-only">
+        <div class="form-title">Materiaal toevoegen</div>
+        <div class="form-grid">
+          <div class="fg" id="fg-bc"><label>Commissienummer <span class="req">*</span></label>
+            <input type="text" id="bc" onblur="vf('bc','fg-bc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ba"><label>Asset Name <span class="req">*</span></label>
+            <input type="text" id="ba" onblur="vf('ba','fg-ba')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bp"><label>Product Name <span class="req">*</span></label>
+            <input type="text" id="bp" onblur="vf('bp','fg-bp')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-badr"><label>Delivery Address <span class="req">*</span></label>
+            <input type="text" id="badr" onblur="vf('badr','fg-badr')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bd"><label>Delivery Date <span class="req">*</span></label>
+            <input type="date" id="bd" onblur="vf('bd','fg-bd')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bf"><label>Foto / Pakbon <span class="req">*</span> <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--text-3)">(max 4)</span></label>
+            <div class="file-drop" onclick="document.getElementById('bf-in').click()">
+              <span class="file-label"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Foto's uploaden</span>
+              <input type="file" id="bf-in" accept="image/*" multiple onchange="addFotos(this,'bf-prev','bf-dat','fg-bf')">
+            </div>
+            <div class="foto-thumbs" id="bf-prev"></div>
+            <span class="ferr">Minimaal 1 foto verplicht</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="addBesteld()">Toevoegen</button>
+      </div>
+      <div class="bulk-bar" id="bk-b">
+        <span class="bulk-info"><span id="cnt-b">0</span> geselecteerd</span>
+        <div class="bulk-btns">
+          <button class="bbtn" onclick="bulkFwd('besteld')">Naar Leverancier</button>
+          <button class="bbtn" onclick="bulkDel('besteld')">Verwijderen</button>
+          <button class="bbtn" onclick="clearSel('besteld')">Deselecteer</button>
+        </div>
+      </div>
+      <div class="filter-status" id="fs-b"><span>Filters actief</span><button class="btn-ghost" onclick="clearFilters('besteld')">Wissen</button></div>
+      <div class="table-card"><div class="table-scroll"><table><thead>
+        <tr>
+          <th class="cb-cell"><input type="checkbox" onchange="selAll('besteld',this.checked)"></th>
+          <th>Commissienummer</th><th>Asset Name</th><th>Product Name</th>
+          <th>Delivery Address</th><th>Delivery Date</th><th>Foto + Pakbon</th><th>Actie</th>
+        </tr>
+        <tr class="filter-r"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','address',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','date',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-b"></tbody></table></div></div>
+    </div>
+
+    <!-- TAB LEVERANCIER -->
+    <div id="tab-leverancier" class="tab-content">
+      <div class="add-form main-only">
+        <div class="form-title">Materiaal toevoegen</div>
+        <div class="form-grid">
+          <div class="fg" id="fg-lc"><label>Commissienummer <span class="req">*</span></label>
+            <input type="text" id="lc" onblur="vf('lc','fg-lc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-la"><label>Asset Name <span class="req">*</span></label>
+            <input type="text" id="la" onblur="vf('la','fg-la')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lp"><label>Product Name <span class="req">*</span></label>
+            <input type="text" id="lp" onblur="vf('lp','fg-lp')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ladr"><label>Delivery Address <span class="req">*</span></label>
+            <input type="text" id="ladr" onblur="vf('ladr','fg-ladr')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ldatum"><label>Lever/Retourdatum <span class="req">*</span></label>
+            <input type="date" id="ldatum" onblur="vf('ldatum','fg-ldatum')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lret"><label>Retournummer <span class="req">*</span></label>
+            <input type="text" id="lret" onblur="vf('lret','fg-lret')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lf"><label>Foto / Pakbon <span class="req">*</span> <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--text-3)">(max 4)</span></label>
+            <div class="file-drop" onclick="document.getElementById('lf-in').click()">
+              <span class="file-label"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Foto's uploaden</span>
+              <input type="file" id="lf-in" accept="image/*" multiple onchange="addFotos(this,'lf-prev','lf-dat','fg-lf')">
+            </div>
+            <div class="foto-thumbs" id="lf-prev"></div>
+            <span class="ferr">Minimaal 1 foto verplicht</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="addLeverancier()">Toevoegen</button>
+      </div>
+      <!-- Side-user: afroepen section -->
+      <div id="side-afroep-hint" style="display:none;margin-bottom:var(--space-4)">
+        <div style="background:var(--primary-hi);border:1px solid var(--primary);border-radius:var(--radius-lg);padding:12px var(--space-5);font-size:var(--text-xs);color:var(--primary);font-weight:500">
+          Selecteer rijen en klik op "Afroepen naar On Site" om materiaal af te roepen.
+        </div>
+      </div>
+      <div class="bulk-bar" id="bk-l">
+        <span class="bulk-info"><span id="cnt-l">0</span> geselecteerd</span>
+        <div class="bulk-btns">
+          <button class="bbtn main-only-bb" onclick="bulkBack('leverancier')">Naar Besteld</button>
+          <button class="bbtn" onclick="bulkFwd('leverancier')">Afroepen naar On Site</button>
+          <button class="bbtn main-only-bb" onclick="bulkDel('leverancier')">Verwijderen</button>
+          <button class="bbtn" onclick="clearSel('leverancier')">Deselecteer</button>
+        </div>
+      </div>
+      <div class="filter-status" id="fs-l"><span>Filters actief</span><button class="btn-ghost" onclick="clearFilters('leverancier')">Wissen</button></div>
+      <div class="table-card"><div class="table-scroll"><table><thead>
+        <tr>
+          <th class="cb-cell"><input type="checkbox" onchange="selAll('leverancier',this.checked)"></th>
+          <th>Commissienummer</th><th>Asset Name</th><th>Product Name</th>
+          <th>Delivery Address</th><th>Lever/Retourdatum</th><th>Retournummer</th><th>Foto + Pakbon</th><th>Actie</th>
+        </tr>
+        <tr class="filter-r"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','address',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','datum',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','retour',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-l"></tbody></table></div></div>
+    </div>
+
+    <!-- TAB ON SITE -->
+    <div id="tab-onsite" class="tab-content">
+      <div class="add-form main-only">
+        <div class="form-title">Materiaal toevoegen</div>
+        <div class="form-grid">
+          <div class="fg" id="fg-oc"><label>Commissienummer <span class="req">*</span></label>
+            <input type="text" id="oc" onblur="vf('oc','fg-oc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-oa"><label>Asset Name <span class="req">*</span></label>
+            <input type="text" id="oa" onblur="vf('oa','fg-oa')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-op"><label>Product Name <span class="req">*</span></label>
+            <input type="text" id="op" onblur="vf('op','fg-op')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-oloc"><label>Location <span class="req">*</span></label>
+            <input type="text" id="oloc" onblur="vf('oloc','fg-oloc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ogem"><label>Gemonteerd <span class="req">*</span></label>
+            <select id="ogem" class="gem-sel" onblur="vf('ogem','fg-ogem')" onchange="gemC(this)">
+              <option value="">-- Selecteer --</option>
+              <option value="Ja">Ja</option>
+              <option value="Nee">Nee</option>
+            </select><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-old"><label>Leverdatum <span class="req">*</span></label>
+            <input type="date" id="old" onblur="vf('old','fg-old')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-of"><label>Foto / Pakbon <span class="req">*</span> <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--text-3)">(max 4)</span></label>
+            <div class="file-drop" onclick="document.getElementById('of-in').click()">
+              <span class="file-label"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Foto's uploaden</span>
+              <input type="file" id="of-in" accept="image/*" multiple onchange="addFotos(this,'of-prev','of-dat','fg-of')">
+            </div>
+            <div class="foto-thumbs" id="of-prev"></div>
+            <span class="ferr">Minimaal 1 foto verplicht</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="addOnsite()">Toevoegen</button>
+      </div>
+      <div class="bulk-bar" id="bk-o">
+        <span class="bulk-info"><span id="cnt-o">0</span> geselecteerd</span>
+        <div class="bulk-btns">
+          <button class="bbtn main-only-bb" onclick="bulkBack('onsite')">Naar Leverancier</button>
+          <button class="bbtn main-only-bb" onclick="bulkDel('onsite')">Verwijderen</button>
+          <button class="bbtn" onclick="clearSel('onsite')">Deselecteer</button>
+        </div>
+      </div>
+      <div class="filter-status" id="fs-o"><span>Filters actief</span><button class="btn-ghost" onclick="clearFilters('onsite')">Wissen</button></div>
+      <div class="table-card"><div class="table-scroll"><table><thead>
+        <tr>
+          <th class="cb-cell"><input type="checkbox" onchange="selAll('onsite',this.checked)"></th>
+          <th>Commissienummer</th><th>Asset Name</th><th>Product Name</th>
+          <th>Location</th><th>Gemonteerd</th><th>Leverdatum</th><th>Foto + Pakbon</th><th>Actie</th>
+        </tr>
+        <tr class="filter-r"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','location',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','gemonteerd',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','leverdatum',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-o"></tbody></table></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOTO MODAL ══ -->
+<div class="foto-modal" id="foto-modal" onclick="closeFM()">
+  <img id="foto-img" src="" alt="Foto">
+</div>
+
+<!-- ══ CTX MENU ══ -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" id="ctx-edit" onclick="ctxDo('edit')">Bewerken</div>
+  <div class="ctx-item main-only-ctx" id="ctx-back" onclick="ctxDo('back')">Terug naar vorige stap</div>
+  <div class="ctx-item" id="ctx-fwd" onclick="ctxDo('fwd')">Verplaats naar volgende stap</div>
+  <div class="ctx-sep main-only-ctx"></div>
+  <div class="ctx-item ctx-danger main-only-ctx" onclick="ctxDo('del')">Verwijderen</div>
+</div>
+
+<!-- ══ POPUP: Besteld → Leverancier ══ -->
+<div id="pop-b2l" class="ov">
+  <div class="ov-box">
+    <h3>Geleverd bij leverancier</h3>
+    <div class="ov-sub">Bevestig de leverdatum. Het delivery address wordt automatisch overgenomen.</div>
+    <div class="ov-grid">
+      <div class="fg" id="fg-pb2l"><label>Leverdatum <span class="req">*</span></label>
+        <input type="date" id="pb2l-d" onblur="vf('pb2l-d','fg-pb2l')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+    </div>
+    <div class="ov-actions">
+      <button class="btn btn-secondary" onclick="closeOv('pop-b2l')">Annuleren</button>
+      <button class="btn btn-primary" onclick="confirmB2L()">Bevestigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP: Leverancier → On Site ══ -->
+<div id="pop-l2o" class="ov">
+  <div class="ov-box">
+    <h3>Afroepen – On Site</h3>
+    <div class="ov-sub">Vul de locatie, montage status en leverdatum in.</div>
+    <div class="ov-grid">
+      <div class="fg" id="fg-pl2o-loc"><label>Location <span class="req">*</span></label>
+        <input type="text" id="pl2o-loc" onblur="vf('pl2o-loc','fg-pl2o-loc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-pl2o-gem"><label>Gemonteerd <span class="req">*</span></label>
+        <select id="pl2o-gem" class="gem-sel" onblur="vf('pl2o-gem','fg-pl2o-gem')" onchange="gemC(this)">
+          <option value="">-- Selecteer --</option>
+          <option value="Ja">Ja</option>
+          <option value="Nee">Nee</option>
+        </select><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-pl2o-ld"><label>Leverdatum <span class="req">*</span></label>
+        <input type="date" id="pl2o-ld" onblur="vf('pl2o-ld','fg-pl2o-ld')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+    </div>
+    <div class="ov-actions">
+      <button class="btn btn-secondary" onclick="closeOv('pop-l2o')">Annuleren</button>
+      <button class="btn btn-primary" onclick="confirmL2O()">Bevestigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP: On Site → Leverancier (retour) ══ -->
+<div id="pop-o2l" class="ov">
+  <div class="ov-box">
+    <h3>Retour naar leverancier</h3>
+    <div class="ov-sub">Vul de retourgegevens in en voeg een foto toe.</div>
+    <div class="ov-grid">
+      <div class="fg" id="fg-po2l-d"><label>Retourdatum <span class="req">*</span></label>
+        <input type="date" id="po2l-d" onblur="vf('po2l-d','fg-po2l-d')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-po2l-r"><label>Retournummer <span class="req">*</span></label>
+        <input type="text" id="po2l-r" onblur="vf('po2l-r','fg-po2l-r')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-po2l-f"><label>Foto <span class="req">*</span> <span style="font-weight:400;text-transform:none;font-size:10px;color:var(--text-3)">(max 4)</span></label>
+        <div class="file-drop" onclick="document.getElementById('po2l-fin').click()">
+          <span class="file-label"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Foto's uploaden</span>
+          <input type="file" id="po2l-fin" accept="image/*" multiple onchange="addFotos(this,'po2l-prev','po2l-dat','fg-po2l-f')">
+        </div>
+        <div class="foto-thumbs" id="po2l-prev"></div>
+        <span class="ferr">Minimaal 1 foto verplicht</span>
+      </div>
+    </div>
+    <div class="ov-actions">
+      <button class="btn btn-secondary" onclick="closeOv('pop-o2l')">Annuleren</button>
+      <button class="btn btn-primary" onclick="confirmO2L()">Bevestigen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ POPUP: EDIT ROW ══ -->
+<div id="pop-edit" class="ov">
+  <div class="ov-box edit-box">
+    <h3>Rij bewerken</h3>
+    <div class="ov-sub" id="edit-sub"></div>
+    <div class="edit-grid" id="edit-fields"></div>
+    <div class="ov-actions">
+      <button class="btn btn-secondary" onclick="closeOv('pop-edit')">Annuleren</button>
+      <button class="btn btn-primary" onclick="saveEdit()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SIDE-USER AFROEP POPUP ══ -->
+<div id="pop-call" class="call-ov">
+  <div class="call-box">
+    <h3>Afroepen bevestigen</h3>
+    <p>Vul locatie, montage en leverdatum in. De volgende items worden afgeroepen:</p>
+    <div class="call-item-list" id="call-items"></div>
+    <div class="ov-grid">
+      <div class="fg" id="fg-call-loc"><label>Location <span class="req">*</span></label>
+        <input type="text" id="call-loc" onblur="vf('call-loc','fg-call-loc')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-call-gem"><label>Gemonteerd <span class="req">*</span></label>
+        <select id="call-gem" class="gem-sel" onblur="vf('call-gem','fg-call-gem')" onchange="gemC(this)">
+          <option value="">-- Selecteer --</option>
+          <option value="Ja">Ja</option>
+          <option value="Nee">Nee</option>
+        </select><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+      <div class="fg" id="fg-call-ld"><label>Leverdatum <span class="req">*</span></label>
+        <input type="date" id="call-ld" onblur="vf('call-ld','fg-call-ld')"><span class="vcheck">✓</span><span class="ferr">Verplicht</span></div>
+    </div>
+    <div class="ov-actions">
+      <button class="btn btn-secondary" onclick="closeCallPop()">Annuleren</button>
+      <button class="btn btn-primary" onclick="confirmCallPop()">Afroepen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────
+var projs={},curProj=null,curUser=null; // 'main' or 'side'
+var inv={besteld:[],leverancier:[],onsite:[]};
+var fd={'bf-dat':[],'lf-dat':[],'of-dat':[],'po2l-dat':[]};
+var filters={besteld:{},leverancier:{},onsite:{}};
+var ctxState={id:null,tab:null};
+var ppState={id:null,bulk:false,ids:[]};
+var notifs=[];
+var editState={id:null,tab:null};
+var callIds=[];
+
+// ── THEME ─────────────────────────────────────────────────────────────────
+(function(){
+  var toggle=document.querySelector('[data-theme-toggle]');
+  var root=document.documentElement;
+  var d=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
+  root.setAttribute('data-theme',d);
+  toggle&&toggle.addEventListener('click',function(){
+    d=d==='dark'?'light':'dark';
+    root.setAttribute('data-theme',d);
+  });
+})();
+
+// ── STORAGE ───────────────────────────────────────────────────────────────
+function save(){
+  if(curProj)projs[curProj]=JSON.parse(JSON.stringify(inv));
+  try{localStorage.setItem('vba2-projs',JSON.stringify(projs));}catch(e){}
+  try{localStorage.setItem('vba2-notifs',JSON.stringify(notifs));}catch(e){}
+}
+window.onload=function(){
+  try{var s=localStorage.getItem('vba2-projs');if(s)projs=JSON.parse(s);}catch(e){}
+  try{var n=localStorage.getItem('vba2-notifs');if(n)notifs=JSON.parse(n);}catch(e){}
+};
+
+// ── DATE FORMAT ───────────────────────────────────────────────────────────
+function fmtDate(iso){
+  if(!iso)return'–';
+  var p=iso.split('-');
+  if(p.length!==3)return iso;
+  return p[2]+'/'+p[1]+'/'+p[0].slice(2);
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────
+function doLogin(){
+  var u=document.getElementById('lu').value.trim();
+  var p=document.getElementById('lp').value.trim();
+  var err=document.getElementById('login-err');
+  err.classList.remove('on');
+  if(u==='001'&&p==='001'){curUser='main';startApp();}
+  else if(u==='002'&&p==='002'){curUser='side';startApp();}
+  else{err.classList.add('on');}
+}
+function startApp(){
+  document.getElementById('login-ov').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('user-badge').textContent=curUser==='main'?'Main User':'Side User';
+  if(curUser==='main'){
+    document.getElementById('notif-wrap').style.display='block';
+    updateNotifDot();
+  }
+  applyUserUI();
+  showHome();
+}
+function doLogout(){
+  curUser=null;curProj=null;
+  document.getElementById('topbar').style.display='none';
+  document.getElementById('home-view').style.display='none';
+  document.getElementById('proj-view').style.display='none';
+  document.getElementById('login-ov').style.display='flex';
+  document.getElementById('lu').value='';
+  document.getElementById('lp').value='';
+  document.getElementById('login-err').classList.remove('on');
+}
+function applyUserUI(){
+  var isMain=curUser==='main';
+  // hide/show add forms
+  document.querySelectorAll('.main-only').forEach(function(el){
+    el.style.display=isMain?'':'none';
+  });
+  // hide/show side hint
+  document.getElementById('side-afroep-hint').style.display=isMain?'none':'block';
+  // bulk buttons
+  document.querySelectorAll('.main-only-bb').forEach(function(el){
+    el.style.display=isMain?'':'none';
+  });
+  // ctx items
+  document.querySelectorAll('.main-only-ctx').forEach(function(el){
+    el.style.display=isMain?'':'none';
+  });
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────
+function showHome(){
+  document.getElementById('home-view').style.display='block';
+  document.getElementById('proj-view').style.display='none';
+  document.getElementById('back-btn').style.display='none';
+  document.getElementById('topbar-title').textContent='Voorraad Beheer';
+  if(curUser==='main'){
+    document.getElementById('home-add-form').style.display='block';
+  } else {
+    document.getElementById('home-add-form').style.display='none';
+  }
+  renderProjGrid();
+}
+function goHome(){save();curProj=null;showHome();}
+function renderProjGrid(){
+  var g=document.getElementById('proj-grid');
+  var ks=Object.keys(projs);
+  if(!ks.length){
+    g.innerHTML='<div class="empty-state" style="grid-column:1/-1"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg><p>Geen projecten gevonden.</p></div>';
+    return;
+  }
+  g.innerHTML='';
+  ks.forEach(function(id){
+    var p=projs[id],d=document.createElement('div');
+    d.className='proj-card';
+    d.innerHTML='<h3>'+esc(p.name)+'</h3>'
+      +'<div class="proj-stats">'
+      +'<div class="ps"><span class="ps-n">'+p.besteld.length+'</span><span class="ps-l">Besteld</span></div>'
+      +'<div class="ps"><span class="ps-n">'+p.leverancier.length+'</span><span class="ps-l">Leverancier</span></div>'
+      +'<div class="ps"><span class="ps-n">'+p.onsite.length+'</span><span class="ps-l">On Site</span></div>'
+      +'</div>'
+      +'<button class="btn btn-primary proj-open-btn" onclick="event.stopPropagation();openProj(\''+id+'\')">Project openen</button>';
+    d.addEventListener('click',function(){openProj(id);});
+    g.appendChild(d);
+  });
+}
+function addProject(){
+  var n=document.getElementById('pname-in').value.trim();
+  if(!n){alert('Voer een projectnaam in.');return;}
+  var id='p'+Date.now();
+  projs[id]={id:id,name:n,besteld:[],leverancier:[],onsite:[]};
+  save();document.getElementById('pname-in').value='';renderProjGrid();
+}
+
+// ── PROJECT ───────────────────────────────────────────────────────────────
+function openProj(id){
+  curProj=id;
+  inv=JSON.parse(JSON.stringify(projs[id]));
+  document.getElementById('home-view').style.display='none';
+  document.getElementById('proj-view').style.display='block';
+  document.getElementById('back-btn').style.display='flex';
+  document.getElementById('proj-title').textContent=projs[id].name;
+  document.getElementById('proj-sub').textContent=curUser==='side'?'Beperkte toegang – u kunt materiaal afroepen':'Volledige toegang';
+  document.getElementById('topbar-title').textContent=projs[id].name;
+  applyUserUI();
+  renderAll();
+  // Switch to leverancier tab for side user
+  if(curUser==='side'){
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('tab-leverancier').classList.add('active');
+  }
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.tab-content').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── VALIDATION ────────────────────────────────────────────────────────────
+function vf(elId,grpId){
+  var el=document.getElementById(elId),g=document.getElementById(grpId);
+  if(!el||!g)return false;
+  g.classList.remove('valid','invalid');
+  if(el.value.trim()){g.classList.add('valid');return true;}
+  g.classList.add('invalid');return false;
+}
+function vFoto(store,grpId){
+  var g=document.getElementById(grpId);
+  var ok=fd[store]&&fd[store].length>0;
+  if(!g)return ok;
+  g.classList.remove('valid','invalid');
+  if(ok)g.classList.add('valid');else g.classList.add('invalid');
+  return ok;
+}
+function vForm(pairs){var ok=true;pairs.forEach(function(p){if(!vf(p[0],p[1]))ok=false;});return ok;}
+function gemC(s){s.classList.remove('gem-ja','gem-nee');if(s.value==='Ja')s.classList.add('gem-ja');else if(s.value==='Nee')s.classList.add('gem-nee');}
+function resetFg(grpId,elId){
+  var g=document.getElementById(grpId),el=document.getElementById(elId);
+  if(g)g.classList.remove('valid','invalid');
+  if(el){el.value='';if(el.classList)el.classList.remove('gem-ja','gem-nee');}
+}
+function g(id){var e=document.getElementById(id);return e?e.value.trim():'';}
+function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+// ── FOTO UPLOAD ───────────────────────────────────────────────────────────
+function addFotos(input,prevId,store,grpId){
+  if(!fd[store])fd[store]=[];
+  var rem=4-fd[store].length,files=Array.from(input.files);
+  if(rem<=0){alert('Maximum 4 foto\'s bereikt.');input.value='';return;}
+  var use=files.slice(0,rem);
+  if(files.length>rem)alert('Max 4 foto\'s. Enkel '+rem+' toegevoegd.');
+  use.forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(e){fd[store].push(e.target.result);renderFPrev(store,prevId,grpId);};
+    r.readAsDataURL(f);
+  });
+  input.value='';
+}
+function renderFPrev(store,prevId,grpId){
+  var c=document.getElementById(prevId);if(!c)return;
+  c.innerHTML='';
+  (fd[store]||[]).forEach(function(src,i){
+    var w=document.createElement('div');w.className='fthumb';
+    w.innerHTML='<img src="'+src+'" alt="foto" loading="lazy"><button class="fthumb-rm" onclick="rmFoto(\''+store+'\',\''+prevId+'\',\''+grpId+'\','+i+')">×</button>';
+    c.appendChild(w);
+  });
+  if(grpId)vFoto(store,grpId);
+}
+function rmFoto(store,prevId,grpId,i){fd[store].splice(i,1);renderFPrev(store,prevId,grpId);}
+function clearFd(store,prevId){fd[store]=[];var c=document.getElementById(prevId);if(c)c.innerHTML='';}
+
+// ── ADD ROWS ──────────────────────────────────────────────────────────────
+function addBesteld(){
+  var ok=vForm([['bc','fg-bc'],['ba','fg-ba'],['bp','fg-bp'],['badr','fg-badr'],['bd','fg-bd']]);
+  if(!vFoto('bf-dat','fg-bf'))ok=false;
+  if(!ok)return;
+  inv.besteld.push({id:Date.now()+Math.random(),commissie:g('bc'),asset:g('ba'),product:g('bp'),address:g('badr'),date:g('bd'),fotos:[].concat(fd['bf-dat'])});
+  ['bc','ba','bp','badr','bd'].forEach(function(id){document.getElementById(id).value='';});
+  ['fg-bc','fg-ba','fg-bp','fg-badr','fg-bd','fg-bf'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('valid','invalid');});
+  clearFd('bf-dat','bf-prev');save();renderB();
+}
+function addLeverancier(){
+  var ok=vForm([['lc','fg-lc'],['la','fg-la'],['lp','fg-lp'],['ladr','fg-ladr'],['ldatum','fg-ldatum'],['lret','fg-lret']]);
+  if(!vFoto('lf-dat','fg-lf'))ok=false;
+  if(!ok)return;
+  inv.leverancier.push({id:Date.now()+Math.random(),commissie:g('lc'),asset:g('la'),product:g('lp'),address:g('ladr'),datum:g('ldatum'),retour:g('lret'),fotos:[].concat(fd['lf-dat'])});
+  ['lc','la','lp','ladr','ldatum','lret'].forEach(function(id){document.getElementById(id).value='';});
+  ['fg-lc','fg-la','fg-lp','fg-ladr','fg-ldatum','fg-lret','fg-lf'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('valid','invalid');});
+  clearFd('lf-dat','lf-prev');save();renderL();
+}
+function addOnsite(){
+  var ok=vForm([['oc','fg-oc'],['oa','fg-oa'],['op','fg-op'],['oloc','fg-oloc'],['ogem','fg-ogem'],['old','fg-old']]);
+  if(!vFoto('of-dat','fg-of'))ok=false;
+  if(!ok)return;
+  inv.onsite.push({id:Date.now()+Math.random(),commissie:g('oc'),asset:g('oa'),product:g('op'),location:g('oloc'),gemonteerd:g('ogem'),leverdatum:g('old'),fotos:[].concat(fd['of-dat'])});
+  ['oc','oa','op','oloc','old'].forEach(function(id){document.getElementById(id).value='';});
+  ['fg-oc','fg-oa','fg-op','fg-oloc','fg-ogem','fg-old','fg-of'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.remove('valid','invalid');});
+  var s=document.getElementById('ogem');if(s){s.value='';s.classList.remove('gem-ja','gem-nee');}
+  clearFd('of-dat','of-prev');save();renderO();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function fotosH(fotos){
+  if(!fotos||!fotos.length)return '<span class="nofo">–</span>';
+  return'<div class="tfotos">'+fotos.map(function(s){
+    return'<img src="'+s+'" class="tthumb" onclick="openFM(\''+s+'\');event.stopPropagation();" alt="foto" loading="lazy" width="40" height="40">';
+  }).join('')+'</div>';
+}
+function gemBadge(v){
+  if(v==='Ja')return'<span class="badge badge-ja">Ja</span>';
+  if(v==='Nee')return'<span class="badge badge-nee">Nee</span>';
+  return v||'–';
+}
+function applyFlt(tab,items){
+  var f=filters[tab],ks=Object.keys(f);
+  if(!ks.length)return items;
+  return items.filter(function(item){
+    return ks.every(function(k){return(item[k]||'').toString().toLowerCase().includes(f[k]);});
+  });
+}
+function isMain(){return curUser==='main';}
+function renderB(){
+  var tb=document.getElementById('tb-b'),items=applyFlt('besteld',inv.besteld);
+  if(!items.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Geen items in Besteld</p></div></td></tr>';updStats();return;}
+  tb.innerHTML=items.map(function(item){
+    var actBtn=isMain()?'<button class="btn btn-success" onclick="trigB2L('+item.id+')">Geleverd</button>':'';
+    return'<tr ondblclick="openEdit('+item.id+',\'besteld\')" oncontextmenu="showCtx(event,'+item.id+',\'besteld\')" class="'+(item.sel?'row-sel':'')+'">'
+      +'<td class="cb-cell"><input type="checkbox" '+(item.sel?'checked':'')
+      +' onchange="togSel(\'besteld\','+item.id+',this.checked)" onclick="event.stopPropagation()"></td>'
+      +'<td>'+esc(item.commissie)+'</td><td>'+esc(item.asset)+'</td><td>'+esc(item.product)+'</td>'
+      +'<td>'+esc(item.address||'–')+'</td><td>'+fmtDate(item.date)+'</td>'
+      +'<td>'+fotosH(item.fotos)+'</td><td>'+actBtn+'</td></tr>';
+  }).join('');updStats();
+}
+function renderL(){
+  var tb=document.getElementById('tb-l'),items=applyFlt('leverancier',inv.leverancier);
+  if(!items.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Geen items bij Leverancier</p></div></td></tr>';updStats();return;}
+  tb.innerHTML=items.map(function(item){
+    var actBtn=isMain()
+      ?'<button class="btn btn-secondary" onclick="trigL2O('+item.id+')">Afroepen</button>'
+      :'<button class="btn btn-success" onclick="sideAfroep('+item.id+')">Afroepen</button>';
+    return'<tr ondblclick="openEdit('+item.id+',\'leverancier\')" oncontextmenu="showCtx(event,'+item.id+',\'leverancier\')" class="'+(item.sel?'row-sel':'')+'">'
+      +'<td class="cb-cell"><input type="checkbox" '+(item.sel?'checked':'')
+      +' onchange="togSel(\'leverancier\','+item.id+',this.checked)" onclick="event.stopPropagation()"></td>'
+      +'<td>'+esc(item.commissie)+'</td><td>'+esc(item.asset)+'</td><td>'+esc(item.product)+'</td>'
+      +'<td>'+esc(item.address||'–')+'</td><td>'+fmtDate(item.datum)+'</td>'
+      +'<td>'+esc(item.retour||'–')+'</td>'
+      +'<td>'+fotosH(item.fotos)+'</td><td>'+actBtn+'</td></tr>';
+  }).join('');updStats();
+}
+function renderO(){
+  var tb=document.getElementById('tb-o'),items=applyFlt('onsite',inv.onsite);
+  if(!items.length){tb.innerHTML='<tr><td colspan="9"><div class="empty-state"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Geen items On Site</p></div></td></tr>';updStats();return;}
+  tb.innerHTML=items.map(function(item){
+    var actBtn=isMain()?'<button class="btn btn-retour" onclick="trigO2L('+item.id+')">Retour</button>':'';
+    return'<tr ondblclick="openEdit('+item.id+',\'onsite\')" oncontextmenu="showCtx(event,'+item.id+',\'onsite\')" class="'+(item.sel?'row-sel':'')+'">'
+      +'<td class="cb-cell"><input type="checkbox" '+(item.sel?'checked':'')
+      +' onchange="togSel(\'onsite\','+item.id+',this.checked)" onclick="event.stopPropagation()"></td>'
+      +'<td>'+esc(item.commissie)+'</td><td>'+esc(item.asset)+'</td><td>'+esc(item.product)+'</td>'
+      +'<td>'+esc(item.location||'–')+'</td><td>'+gemBadge(item.gemonteerd)+'</td>'
+      +'<td>'+fmtDate(item.leverdatum)+'</td>'
+      +'<td>'+fotosH(item.fotos)+'</td><td>'+actBtn+'</td></tr>';
+  }).join('');updStats();
+}
+function renderAll(){renderB();renderL();renderO();}
+function renderTab(t){if(t==='besteld')renderB();else if(t==='leverancier')renderL();else renderO();}
+function updStats(){
+  document.getElementById('sn-b').textContent=inv.besteld.length;
+  document.getElementById('sn-l').textContent=inv.leverancier.length;
+  document.getElementById('sn-o').textContent=inv.onsite.length;
+}
+
+// ── POPUPS ────────────────────────────────────────────────────────────────
+function openOv(id){document.getElementById(id).classList.add('on');}
+function closeOv(id){
+  document.getElementById(id).classList.remove('on');
+  ppState={id:null,bulk:false,ids:[]};
+}
+
+// B2L
+function trigB2L(id){ppState.id=id;ppState.bulk=false;resetFg('fg-pb2l','pb2l-d');openOv('pop-b2l');}
+function confirmB2L(){
+  if(!vf('pb2l-d','fg-pb2l'))return;
+  var datum=document.getElementById('pb2l-d').value;
+  var ids=ppState.bulk?ppState.ids:[ppState.id];
+  ids.forEach(function(id){
+    var item=inv.besteld.find(function(i){return i.id==id;});if(!item)return;
+    inv.besteld=inv.besteld.filter(function(i){return i.id!=id;});
+    inv.leverancier.push({id:Date.now()+Math.random(),commissie:item.commissie,asset:item.asset,
+      product:item.product,address:item.address,datum:datum,retour:'',fotos:item.fotos||[]});
+  });
+  closeOv('pop-b2l');save();renderAll();
+}
+
+// L2O
+function trigL2O(id){
+  ppState.id=id;ppState.bulk=false;
+  ['fg-pl2o-loc','pl2o-loc','fg-pl2o-gem','pl2o-gem','fg-pl2o-ld','pl2o-ld'].forEach(function(x,i){
+    if(i%2===0){var el=document.getElementById(x);if(el)el.classList.remove('valid','invalid');}
+    else{var e=document.getElementById(x);if(e){e.value='';e.classList&&e.classList.remove('gem-ja','gem-nee');}}
+  });
+  openOv('pop-l2o');
+}
+function confirmL2O(){
+  var ok=vForm([['pl2o-loc','fg-pl2o-loc'],['pl2o-gem','fg-pl2o-gem'],['pl2o-ld','fg-pl2o-ld']]);
+  if(!ok)return;
+  var loc=g('pl2o-loc'),gem=g('pl2o-gem'),ld=g('pl2o-ld');
+  var ids=ppState.bulk?ppState.ids:[ppState.id];
+  ids.forEach(function(id){
+    var item=inv.leverancier.find(function(i){return i.id==id;});if(!item)return;
+    inv.leverancier=inv.leverancier.filter(function(i){return i.id!=id;});
+    inv.onsite.push({id:Date.now()+Math.random(),commissie:item.commissie,asset:item.asset,
+      product:item.product,location:loc,gemonteerd:gem,leverdatum:ld,fotos:item.fotos||[]});
+  });
+  closeOv('pop-l2o');save();renderAll();
+}
+
+// O2L
+function trigO2L(id){
+  ppState.id=id;ppState.bulk=false;
+  resetFg('fg-po2l-d','po2l-d');resetFg('fg-po2l-r','po2l-r');
+  clearFd('po2l-dat','po2l-prev');
+  var fg=document.getElementById('fg-po2l-f');if(fg)fg.classList.remove('valid','invalid');
+  openOv('pop-o2l');
+}
+function confirmO2L(){
+  var ok=vForm([['po2l-d','fg-po2l-d'],['po2l-r','fg-po2l-r']]);
+  var fo=vFoto('po2l-dat','fg-po2l-f');
+  if(!ok||!fo)return;
+  var datum=g('po2l-d'),retour=g('po2l-r'),fotos=[].concat(fd['po2l-dat']);
+  var ids=ppState.bulk?ppState.ids:[ppState.id];
+  ids.forEach(function(id){
+    var item=inv.onsite.find(function(i){return i.id==id;});if(!item)return;
+    inv.onsite=inv.onsite.filter(function(i){return i.id!=id;});
+    inv.leverancier.push({id:Date.now()+Math.random(),commissie:item.commissie,asset:item.asset,
+      product:item.product,address:item.location||'',datum:datum,retour:retour,fotos:fotos});
+  });
+  closeOv('pop-o2l');save();renderAll();
+}
+
+// ── SIDE USER AFROEP ─────────────────────────────────────────────────────
+function sideAfroep(id){
+  callIds=[id];
+  var item=inv.leverancier.find(function(i){return i.id==id;});
+  renderCallItems([item]);
+  resetFg('fg-call-loc','call-loc');resetFg('fg-call-gem','call-gem');resetFg('fg-call-ld','call-ld');
+  var s=document.getElementById('call-gem');if(s){s.value='';s.classList.remove('gem-ja','gem-nee');}
+  document.getElementById('pop-call').classList.add('on');
+}
+function sideAfroepBulk(){
+  var sel=inv.leverancier.filter(function(i){return i.sel;});
+  if(!sel.length)return;
+  callIds=sel.map(function(i){return i.id;});
+  renderCallItems(sel);
+  resetFg('fg-call-loc','call-loc');resetFg('fg-call-gem','call-gem');resetFg('fg-call-ld','call-ld');
+  var s=document.getElementById('call-gem');if(s){s.value='';s.classList.remove('gem-ja','gem-nee');}
+  document.getElementById('pop-call').classList.add('on');
+}
+function renderCallItems(items){
+  var c=document.getElementById('call-items');
+  c.innerHTML=items.map(function(it){
+    return'<div class="call-item-row"><span class="call-item-name">'+esc(it.asset)+' – '+esc(it.product)+'</span>'
+      +'<span class="call-item-comm">'+esc(it.commissie)+'</span></div>';
+  }).join('');
+}
+function closeCallPop(){document.getElementById('pop-call').classList.remove('on');callIds=[];}
+function confirmCallPop(){
+  var ok=vForm([['call-loc','fg-call-loc'],['call-gem','fg-call-gem'],['call-ld','fg-call-ld']]);
+  if(!ok)return;
+  var loc=g('call-loc'),gem=g('call-gem'),ld=g('call-ld');
+  var afgeroepenItems=[];
+  callIds.forEach(function(id){
+    var item=inv.leverancier.find(function(i){return i.id==id;});if(!item)return;
+    afgeroepenItems.push(item);
+    inv.leverancier=inv.leverancier.filter(function(i){return i.id!=id;});
+    inv.onsite.push({id:Date.now()+Math.random(),commissie:item.commissie,asset:item.asset,
+      product:item.product,location:loc,gemonteerd:gem,leverdatum:ld,fotos:item.fotos||[]});
+  });
+  // Add notification for main user
+  notifs.push({
+    id:Date.now(),
+    title:'Afroep door Side User',
+    items:afgeroepenItems.map(function(it){return it.asset+' – '+it.product+' ('+it.commissie+')';}),
+    loc:loc,datum:fmtDate(ld),time:new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})
+  });
+  closeCallPop();
+  clearSel('leverancier');
+  save();renderAll();updateNotifDot();
+}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────
+function toggleNotif(){document.getElementById('notif-panel').classList.toggle('on');}
+function updateNotifDot(){
+  var dot=document.getElementById('notif-dot');
+  if(dot)dot.classList.toggle('on',notifs.length>0);
+  renderNotifs();
+}
+function renderNotifs(){
+  var list=document.getElementById('notif-list');if(!list)return;
+  if(!notifs.length){list.innerHTML='<div class="notif-empty">Geen afroep verzoeken</div>';return;}
+  list.innerHTML=notifs.map(function(n){
+    return'<div class="notif-item">'
+      +'<div class="notif-item-title">'+esc(n.title)+' · '+n.time+'</div>'
+      +'<div class="notif-item-sub">Locatie: '+esc(n.loc)+' · Leverdatum: '+esc(n.datum)+'</div>'
+      +'<div class="notif-item-sub" style="margin-top:3px">'+n.items.map(esc).join('<br>')+'</div>'
+      +'</div>';
+  }).join('');
+}
+function clearNotifs(){
+  notifs=[];save();updateNotifDot();
+  document.getElementById('notif-panel').classList.remove('on');
+}
+document.addEventListener('click',function(e){
+  var p=document.getElementById('notif-panel');
+  if(p&&p.classList.contains('on')&&!e.target.closest('.notif-wrap'))p.classList.remove('on');
+});
+
+// ── BULK ──────────────────────────────────────────────────────────────────
+function bulkFwd(tab){
+  var sel=inv[tab].filter(function(i){return i.sel;});if(!sel.length)return;
+  ppState.bulk=true;ppState.ids=sel.map(function(i){return i.id;});
+  if(tab==='besteld'){resetFg('fg-pb2l','pb2l-d');openOv('pop-b2l');}
+  else if(tab==='leverancier'){
+    if(curUser==='side'){
+      // Side user bulk afroep
+      callIds=ppState.ids;
+      renderCallItems(sel);
+      resetFg('fg-call-loc','call-loc');resetFg('fg-call-gem','call-gem');resetFg('fg-call-ld','call-ld');
+      var s=document.getElementById('call-gem');if(s){s.value='';s.classList.remove('gem-ja','gem-nee');}
+      document.getElementById('pop-call').classList.add('on');
+      ppState={id:null,bulk:false,ids:[]};
+    } else {
+      ['fg-pl2o-loc','pl2o-loc','fg-pl2o-gem','pl2o-gem','fg-pl2o-ld','pl2o-ld'].forEach(function(x,i){
+        if(i%2===0){var el=document.getElementById(x);if(el)el.classList.remove('valid','invalid');}
+        else{var e=document.getElementById(x);if(e){e.value='';e.classList&&e.classList.remove('gem-ja','gem-nee');}}
+      });
+      openOv('pop-l2o');
+    }
+  }
+}
+function bulkBack(tab){
+  var sel=inv[tab].filter(function(i){return i.sel;});if(!sel.length)return;
+  ppState.bulk=true;ppState.ids=sel.map(function(i){return i.id;});
+  if(tab==='leverancier'){
+    sel.forEach(function(item){
+      inv.leverancier=inv.leverancier.filter(function(i){return i.id!==item.id;});
+      inv.besteld.push({id:Date.now()+Math.random(),commissie:item.commissie,asset:item.asset,
+        product:item.product,address:item.address||'',date:item.datum||'',fotos:item.fotos||[]});
+    });
+    save();renderAll();
+  } else if(tab==='onsite'){
+    resetFg('fg-po2l-d','po2l-d');resetFg('fg-po2l-r','po2l-r');
+    clearFd('po2l-dat','po2l-prev');
+    openOv('pop-o2l');
+  }
+}
+function bulkDel(tab){
+  var cnt=inv[tab].filter(function(i){return i.sel;}).length;if(!cnt)return;
+  if(!confirm('Verwijder '+cnt+' items?'))return;
+  inv[tab]=inv[tab].filter(function(i){return !i.sel;});
+  save();renderTab(tab);updBulk(tab);
+}
+function updBulk(tab){
+  var cnt=inv[tab].filter(function(i){return i.sel;}).length;
+  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
+  document.getElementById('cnt-'+sfx).textContent=cnt;
+  var bar=document.getElementById('bk-'+sfx);
+  if(cnt>0)bar.classList.add('on');else bar.classList.remove('on');
+}
+
+// ── SELECT ────────────────────────────────────────────────────────────────
+function togSel(tab,id,checked){
+  var item=inv[tab].find(function(i){return i.id==id;});
+  if(item){item.sel=checked;renderTab(tab);updBulk(tab);}
+}
+function selAll(tab,checked){
+  inv[tab].forEach(function(i){i.sel=checked;});renderTab(tab);updBulk(tab);
+}
+function clearSel(tab){
+  inv[tab].forEach(function(i){i.sel=false;});renderTab(tab);updBulk(tab);
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────
+function flt(tab,col,val){
+  if(val.trim()==='')delete filters[tab][col];else filters[tab][col]=val.toLowerCase();
+  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
+  var fs=document.getElementById('fs-'+sfx);
+  if(Object.keys(filters[tab]).length)fs.classList.add('on');else fs.classList.remove('on');
+  renderTab(tab);
+}
+function clearFilters(tab){
+  filters[tab]={};
+  document.querySelectorAll('#tab-'+tab+' .filter-r input').forEach(function(i){i.value='';});
+  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
+  document.getElementById('fs-'+sfx).classList.remove('on');
+  renderTab(tab);
+}
+
+// ── CTX MENU ─────────────────────────────────────────────────────────────
+function showCtx(e,id,tab){
+  e.preventDefault();e.stopPropagation();
+  ctxState={id:id,tab:tab};
+  var m=document.getElementById('ctx-menu');
+  m.style.left=Math.min(e.pageX,window.innerWidth-220)+'px';
+  m.style.top=Math.min(e.pageY,window.innerHeight-200)+'px';
+  m.classList.add('on');
+  // show/hide ctx items for side user
+  var isM=isMain();
+  document.getElementById('ctx-fwd').style.display=
+    (tab==='onsite'||(tab==='leverancier'&&!isM))?'none':'';
+  if(!isM)document.getElementById('ctx-edit').style.display='none';
+  else document.getElementById('ctx-edit').style.display='';
+}
+function ctxDo(a){
+  var id=ctxState.id,tab=ctxState.tab;
+  if(a==='edit'){openEdit(id,tab);}
+  else if(a==='del'){
+    inv[tab]=inv[tab].filter(function(i){return i.id!=id;});save();renderTab(tab);
+  } else if(a==='back'){
+    if(tab==='leverancier'){
+      var it=inv.leverancier.find(function(i){return i.id==id;});if(!it)return;
+      inv.leverancier=inv.leverancier.filter(function(i){return i.id!=id;});
+      inv.besteld.push({id:Date.now()+Math.random(),commissie:it.commissie,asset:it.asset,
+        product:it.product,address:it.address||'',date:it.datum||'',fotos:it.fotos||[]});
+      save();renderAll();
+    } else if(tab==='onsite'){trigO2L(id);}
+  } else if(a==='fwd'){
+    if(tab==='besteld')trigB2L(id);
+    else if(tab==='leverancier')trigL2O(id);
+  }
+  document.getElementById('ctx-menu').classList.remove('on');
+}
+document.addEventListener('click',function(){document.getElementById('ctx-menu').classList.remove('on');});
+
+// ── EDIT ROW ─────────────────────────────────────────────────────────────
+function openEdit(id,tab){
+  var item=inv[tab].find(function(i){return i.id==id;});if(!item)return;
+  editState={id:id,tab:tab};
+  var sub=document.getElementById('edit-sub');
+  var container=document.getElementById('edit-fields');
+  var tabLabel={'besteld':'Besteld','leverancier':'Leverancier','onsite':'On Site'};
+  sub.textContent='Rij bewerken in '+tabLabel[tab];
+  var fields=[];
+  if(tab==='besteld'){
+    fields=[
+      {key:'commissie',label:'Commissienummer',type:'text'},
+      {key:'asset',label:'Asset Name',type:'text'},
+      {key:'product',label:'Product Name',type:'text'},
+      {key:'address',label:'Delivery Address',type:'text'},
+      {key:'date',label:'Delivery Date',type:'date'}
+    ];
+  } else if(tab==='leverancier'){
+    fields=[
+      {key:'commissie',label:'Commissienummer',type:'text'},
+      {key:'asset',label:'Asset Name',type:'text'},
+      {key:'product',label:'Product Name',type:'text'},
+      {key:'address',label:'Delivery Address',type:'text'},
+      {key:'datum',label:'Lever/Retourdatum',type:'date'},
+      {key:'retour',label:'Retournummer',type:'text'}
+    ];
+  } else {
+    fields=[
+      {key:'commissie',label:'Commissienummer',type:'text'},
+      {key:'asset',label:'Asset Name',type:'text'},
+      {key:'product',label:'Product Name',type:'text'},
+      {key:'location',label:'Location',type:'text'},
+      {key:'gemonteerd',label:'Gemonteerd',type:'select',options:['Ja','Nee']},
+      {key:'leverdatum',label:'Leverdatum',type:'date'}
+    ];
+  }
+  container.innerHTML=fields.map(function(f){
+    var val=item[f.key]||'';
+    if(f.type==='select'){
+      var opts=f.options.map(function(o){return'<option value="'+o+'"'+(val===o?' selected':'')+'>'+o+'</option>';}).join('');
+      return'<div class="fg"><label>'+f.label+'</label>'
+        +'<select id="edit-'+f.key+'" class="gem-sel" onchange="gemC(this)">'
+        +'<option value="">-- Selecteer --</option>'+opts+'</select></div>';
+    }
+    return'<div class="fg"><label>'+f.label+'</label>'
+      +'<input type="'+f.type+'" id="edit-'+f.key+'" value="'+esc(val)+'"></div>';
+  }).join('');
+  // handle gem color on load
+  var gemSel=document.getElementById('edit-gemonteerd');
+  if(gemSel)gemC(gemSel);
+  openOv('pop-edit');
+}
+function saveEdit(){
+  var id=editState.id,tab=editState.tab;
+  var item=inv[tab].find(function(i){return i.id==id;});if(!item)return;
+  var fieldMap={
+    besteld:['commissie','asset','product','address','date'],
+    leverancier:['commissie','asset','product','address','datum','retour'],
+    onsite:['commissie','asset','product','location','gemonteerd','leverdatum']
+  };
+  (fieldMap[tab]||[]).forEach(function(k){
+    var el=document.getElementById('edit-'+k);
+    if(el)item[k]=el.value.trim();
+  });
+  closeOv('pop-edit');save();renderTab(tab);
+}
+
+// ── FOTO MODAL ────────────────────────────────────────────────────────────
+function openFM(src){document.getElementById('foto-img').src=src;document.getElementById('foto-modal').classList.add('on');}
+function closeFM(){document.getElementById('foto-modal').classList.remove('on');}
+</script>
+</body>
+</html>
