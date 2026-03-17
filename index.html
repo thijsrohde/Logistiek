@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<html lang='nl'>
+<html lang="nl">
 <head>
-<meta charset='UTF-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Logistiek Beheer</title>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 :root{--bg:#f0f2f5;--surface:#fff;--s2:#f7f8fa;--s3:#eef0f4;--text:#111827;--text2:#6b7280;--text3:#9ca3af;--primary:#1d4ed8;--ph:#1e40af;--plt:#eff6ff;--pbd:#bfdbfe;--green:#15803d;--glt:#f0fdf4;--gbd:#bbf7d0;--gtext:#166534;--red:#b91c1c;--rlt:#fef2f2;--rbd:#fecaca;--rtext:#991b1b;--border:#e5e7eb;--border2:#d1d5db;--r:5px;--r2:7px;--r3:10px;--r4:14px;--sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--sh2:0 4px 12px rgba(0,0,0,.09),0 2px 4px rgba(0,0,0,.05);--sh3:0 8px 24px rgba(0,0,0,.13),0 3px 8px rgba(0,0,0,.06)}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -114,36 +112,38 @@ tbody tr.sr{background:var(--plt)}tbody tr.erow td{padding:36px;text-align:cente
 .ctx{display:none;position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--sh3);z-index:400;min-width:200px;padding:5px}
 .ctx.on{display:block}.ci{padding:8px 11px;cursor:pointer;border-radius:var(--r);color:var(--text);font-size:13px;transition:background .12s}
 .ci:hover{background:var(--s2)}.ci.danger{color:var(--red)}.ci.danger:hover{background:var(--rlt)}
-#login-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;z-index:1000}
-#login-screen.on{display:flex}
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000}
 .lbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r4);padding:36px;width:360px;box-shadow:var(--sh3)}
 .lbox h2{font-size:18px;font-weight:700;margin-bottom:4px}
 .lsub{font-size:12.5px;color:var(--text2);margin-bottom:22px}
 .lerr{font-size:12px;color:var(--red);margin-top:10px;display:none}.lerr.on{display:block}
 .su-banner{background:var(--plt);border-bottom:2px solid var(--primary);padding:7px 28px;font-size:12.5px;color:var(--primary);font-weight:500;display:none}
 .su-banner.on{display:block}
-
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="login-screen" class="on">
+<div id="login-screen">
   <div class="lbox">
     <h2>Logistiek Beheer</h2>
     <p class="lsub">Log in om verder te gaan</p>
-    <div class="fg" id="fg-lu" style="margin-bottom:12px"><label>Gebruikersnaam</label>
+    <div class="fg" id="fg-lu" style="margin-bottom:12px">
+      <label>Gebruikersnaam</label>
       <input type="text" id="lu" placeholder="bijv. 001" onkeypress="if(event.key==='Enter')doLogin()">
-      <span class="vck">&#10003;</span></div>
-    <div class="fg" id="fg-lp"><label>Wachtwoord</label>
+      <span class="vck">&#10003;</span>
+    </div>
+    <div class="fg" id="fg-lp">
+      <label>Wachtwoord</label>
       <input type="password" id="lp" placeholder="Wachtwoord" onkeypress="if(event.key==='Enter')doLogin()">
-      <span class="vck">&#10003;</span></div>
+      <span class="vck">&#10003;</span>
+    </div>
     <div style="margin-top:18px"><button class="btn bp" style="width:100%" onclick="doLogin()">Inloggen</button></div>
     <div class="lerr" id="lerr">Onjuiste gebruikersnaam of wachtwoord</div>
   </div>
 </div>
 
-<!-- SIDE BANNER -->
+<!-- SIDE USER BANNER -->
 <div class="su-banner" id="su-banner">Ingelogd als gebruiker 002 — u kunt alleen materialen afroepen van Leverancier naar On Site</div>
 
 <!-- HEADER -->
@@ -169,126 +169,182 @@ tbody tr.sr{background:var(--plt)}tbody tr.erow td{padding:36px;text-align:cente
 <!-- APP -->
 <div id="app" style="display:none">
 
-<!-- HOME -->
-<div id="pg-home" class="page active">
-  <div class="ph"><h1>Project Overzicht</h1><p>Selecteer een project of maak een nieuw project aan</p></div>
-  <div class="panel" id="add-proj-panel">
-    <div class="panel-t">Nieuw Project</div>
-    <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
-      <div class="fg" id="fg-pn" style="flex:1;min-width:200px"><label>Project Naam <span class="rs">*</span></label>
-        <input type="text" id="pname-inp" placeholder="Projectnaam" onkeypress="if(event.key==='Enter')addProject()">
-        <span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-      <button class="btn bp" onclick="addProject()">Project toevoegen</button>
-    </div>
-  </div>
-  <div class="pgrid" id="pgrid"></div>
-</div>
-
-<!-- PROJECT -->
-<div id="pg-proj" class="page">
-  <div class="ph">
-    <button class="btn bg2" style="font-size:12px;padding:6px 12px;margin-bottom:10px" onclick="goHome()">&#8592; Terug</button>
-    <h1 id="proj-title">Project</h1>
-    <div class="srow">
-      <div class="sc"><div class="sn" id="sn-b">0</div><div class="sl">Besteld</div></div>
-      <div class="sc"><div class="sn" id="sn-l">0</div><div class="sl">Bij Leverancier</div></div>
-      <div class="sc"><div class="sn" id="sn-o">0</div><div class="sl">On Site</div></div>
-    </div>
-  </div>
-  <div class="tabs">
-    <button class="tab active" onclick="swTab('besteld',this)">Voorraad Besteld</button>
-    <button class="tab" onclick="swTab('leverancier',this)">Voorraad Leverancier</button>
-    <button class="tab" onclick="swTab('onsite',this)">Voorraad On Site</button>
-  </div>
-
-  <!-- TAB BESTELD -->
-  <div id="tc-besteld" class="tc active">
-    <div class="panel" id="form-besteld">
-      <div class="panel-t">Materiaal toevoegen</div>
-      <div class="fgrid">
-        <div class="fg" id="fg-bc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="bc" onblur="vf('bc','fg-bc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-ba"><label>Asset Name <span class="rs">*</span></label><input type="text" id="ba" onblur="vf('ba','fg-ba')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-bp"><label>Product Name <span class="rs">*</span></label><input type="text" id="bp" onblur="vf('bp','fg-bp')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-badr"><label>Delivery Address <span class="rs">*</span></label><input type="text" id="badr" onblur="vf('badr','fg-badr')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-bd"><label>Delivery Date <span class="rs">*</span></label><input type="date" id="bd" onblur="vf('bd','fg-bd')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-bf"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
-          <div class="fz" onclick="document.getElementById('bf-in').click()"><span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
-          <input type="file" id="bf-in" accept="image/*" multiple onchange="addFotos(this,'bfp','bf-d','fg-bf')"></div>
-          <div class="fpv" id="bfp"></div><span class="ferr">Minimaal 1 foto vereist</span></div>
+  <!-- HOME PAGE -->
+  <div id="pg-home" class="page active">
+    <div class="ph"><h1>Project Overzicht</h1><p>Selecteer een project of maak een nieuw project aan</p></div>
+    <div class="panel" id="add-proj-panel">
+      <div class="panel-t">Nieuw Project</div>
+      <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+        <div class="fg" id="fg-pn" style="flex:1;min-width:200px">
+          <label>Project Naam <span class="rs">*</span></label>
+          <input type="text" id="pname-inp" placeholder="Projectnaam" onkeypress="if(event.key==='Enter')addProject()">
+          <span class="vck">&#10003;</span><span class="ferr">Verplicht</span>
+        </div>
+        <button class="btn bp" onclick="addProject()">Project toevoegen</button>
       </div>
-      <button class="btn bp" onclick="addBesteld()">Toevoegen</button>
     </div>
-    <div class="bb" id="bb-b"><span class="bi"><span id="cnt-b">0</span> geselecteerd</span>
-      <div class="bbs"><button class="bkb" onclick="bulkNext('besteld')">Naar Leverancier &#8594;</button><button class="bkb" onclick="bulkDel('besteld')">Verwijderen</button><button class="bkb" onclick="clearSel('besteld')">Deselecteren</button></div></div>
-    <div class="fst" id="fst-b"><span>Filters actief</span><button class="fsc" onclick="clrF('besteld')">Wis filters</button></div>
-    <div class="tw"><table><thead>
-      <tr><th class="cbc"><input type="checkbox" onchange="selAll('besteld',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Delivery Address</th><th>Delivery Date</th><th>Foto + Pakbon</th><th>Actie</th></tr>
-      <tr class="fr"><td></td><td><input type="text" placeholder="Filter..." oninput="flt('besteld','commissie',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('besteld','asset',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('besteld','product',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('besteld','address',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('besteld','date',this.value)"></td><td></td><td></td></tr>
-    </thead><tbody id="tb-b"></tbody></table></div>
+    <div class="pgrid" id="pgrid"></div>
   </div>
 
-  <!-- TAB LEVERANCIER -->
-  <div id="tc-leverancier" class="tc">
-    <div class="panel" id="form-leverancier">
-      <div class="panel-t">Materiaal toevoegen</div>
-      <div class="fgrid">
-        <div class="fg" id="fg-lc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="lc" onblur="vf('lc','fg-lc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-la"><label>Asset Name <span class="rs">*</span></label><input type="text" id="la" onblur="vf('la','fg-la')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-lp"><label>Product Name <span class="rs">*</span></label><input type="text" id="lp" onblur="vf('lp','fg-lp')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-ladr"><label>Delivery Address <span class="rs">*</span></label><input type="text" id="ladr" onblur="vf('ladr','fg-ladr')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-ldatum"><label>Lever/Retourdatum <span class="rs">*</span></label><input type="date" id="ldatum" onblur="vf('ldatum','fg-ldatum')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-lret"><label>Retournummer <span class="rs">*</span></label><input type="text" id="lret" onblur="vf('lret','fg-lret')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-lf"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
-          <div class="fz" onclick="document.getElementById('lf-in').click()"><span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
-          <input type="file" id="lf-in" accept="image/*" multiple onchange="addFotos(this,'lfp','lf-d','fg-lf')"></div>
-          <div class="fpv" id="lfp"></div><span class="ferr">Minimaal 1 foto vereist</span></div>
+  <!-- PROJECT PAGE -->
+  <div id="pg-proj" class="page">
+    <div class="ph">
+      <button class="btn bg2" style="font-size:12px;padding:6px 12px;margin-bottom:10px" onclick="goHome()">&#8592; Terug</button>
+      <h1 id="proj-title">Project</h1>
+      <div class="srow">
+        <div class="sc"><div class="sn" id="sn-b">0</div><div class="sl">Besteld</div></div>
+        <div class="sc"><div class="sn" id="sn-l">0</div><div class="sl">Bij Leverancier</div></div>
+        <div class="sc"><div class="sn" id="sn-o">0</div><div class="sl">On Site</div></div>
       </div>
-      <button class="btn bp" onclick="addLeverancier()">Toevoegen</button>
     </div>
-    <div class="bb" id="bb-l"><span class="bi"><span id="cnt-l">0</span> geselecteerd</span>
-      <div class="bbs"><button class="bkb" onclick="bulkPrev('leverancier')">&#8592; Naar Besteld</button><button class="bkb" onclick="bulkNext('leverancier')">Naar On Site &#8594;</button><button class="bkb" onclick="bulkDel('leverancier')">Verwijderen</button><button class="bkb" onclick="clearSel('leverancier')">Deselecteren</button></div></div>
-    <div class="fst" id="fst-l"><span>Filters actief</span><button class="fsc" onclick="clrF('leverancier')">Wis filters</button></div>
-    <div class="tw"><table><thead>
-      <tr><th class="cbc"><input type="checkbox" onchange="selAll('leverancier',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Delivery Address</th><th>Lever/Retourdatum</th><th>Retournummer</th><th>Foto + Pakbon</th><th>Actie</th></tr>
-      <tr class="fr"><td></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','commissie',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','asset',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','product',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','address',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','datum',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('leverancier','retour',this.value)"></td><td></td><td></td></tr>
-    </thead><tbody id="tb-l"></tbody></table></div>
-  </div>
+    <div class="tabs">
+      <button class="tab active" onclick="swTab('besteld',this)">Voorraad Besteld</button>
+      <button class="tab" onclick="swTab('leverancier',this)">Voorraad Leverancier</button>
+      <button class="tab" onclick="swTab('onsite',this)">Voorraad On Site</button>
+    </div>
 
-  <!-- TAB ON SITE -->
-  <div id="tc-onsite" class="tc">
-    <div class="panel" id="form-onsite">
-      <div class="panel-t">Materiaal toevoegen</div>
-      <div class="fgrid">
-        <div class="fg" id="fg-oc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="oc" onblur="vf('oc','fg-oc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-oa"><label>Asset Name <span class="rs">*</span></label><input type="text" id="oa" onblur="vf('oa','fg-oa')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-op"><label>Product Name <span class="rs">*</span></label><input type="text" id="op" onblur="vf('op','fg-op')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-oloc"><label>Location <span class="rs">*</span></label><input type="text" id="oloc" onblur="vf('oloc','fg-oloc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-ogem"><label>Gemonteerd <span class="rs">*</span></label>
-          <select id="ogem" onblur="vf('ogem','fg-ogem')" onchange="gcol(this)"><option value="">-- Selecteer --</option><option value="Ja">Ja (niet beschikbaar)</option><option value="Nee">Nee (beschikbaar)</option></select>
-          <span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-old"><label>Leverdatum <span class="rs">*</span></label><input type="date" id="old" onblur="vf('old','fg-old')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-        <div class="fg" id="fg-of"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
-          <div class="fz" onclick="document.getElementById('of-in').click()"><span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
-          <input type="file" id="of-in" accept="image/*" multiple onchange="addFotos(this,'ofp','of-d','fg-of')"></div>
-          <div class="fpv" id="ofp"></div><span class="ferr">Minimaal 1 foto vereist</span></div>
+    <!-- TAB BESTELD -->
+    <div id="tc-besteld" class="tc active">
+      <div class="panel" id="form-besteld">
+        <div class="panel-t">Materiaal toevoegen</div>
+        <div class="fgrid">
+          <div class="fg" id="fg-bc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="bc" onblur="vf('bc','fg-bc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ba"><label>Asset Name <span class="rs">*</span></label><input type="text" id="ba" onblur="vf('ba','fg-ba')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bp"><label>Product Name <span class="rs">*</span></label><input type="text" id="bp" onblur="vf('bp','fg-bp')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-badr"><label>Delivery Address <span class="rs">*</span></label><input type="text" id="badr" onblur="vf('badr','fg-badr')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bd"><label>Delivery Date <span class="rs">*</span></label><input type="date" id="bd" onblur="vf('bd','fg-bd')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-bf"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
+            <div class="fz" onclick="document.getElementById('bf-in').click()">
+              <span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
+              <input type="file" id="bf-in" accept="image/*" multiple onchange="addFotos(this,'bfp','bf-d','fg-bf')">
+            </div>
+            <div class="fpv" id="bfp"></div><span class="ferr">Minimaal 1 foto vereist</span>
+          </div>
+        </div>
+        <button class="btn bp" onclick="addBesteld()">Toevoegen</button>
       </div>
-      <button class="btn bp" onclick="addOnsite()">Toevoegen</button>
+      <div class="bb" id="bb-b"><span class="bi"><span id="cnt-b">0</span> geselecteerd</span>
+        <div class="bbs">
+          <button class="bkb" onclick="bulkNext('besteld')">Naar Leverancier &#8594;</button>
+          <button class="bkb" onclick="bulkDel('besteld')">Verwijderen</button>
+          <button class="bkb" onclick="clearSel('besteld')">Deselecteren</button>
+        </div>
+      </div>
+      <div class="fst" id="fst-b"><span>Filters actief</span><button class="fsc" onclick="clrF('besteld')">Wis filters</button></div>
+      <div class="tw"><table><thead>
+        <tr><th class="cbc"><input type="checkbox" onchange="selAll('besteld',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Delivery Address</th><th>Delivery Date</th><th>Foto + Pakbon</th><th>Actie</th></tr>
+        <tr class="fr"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','address',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('besteld','date',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-b"></tbody></table></div>
     </div>
-    <div class="bb" id="bb-o"><span class="bi"><span id="cnt-o">0</span> geselecteerd</span>
-      <div class="bbs"><button class="bkb" onclick="bulkPrev('onsite')">&#8592; Naar Leverancier</button><button class="bkb" onclick="bulkDel('onsite')">Verwijderen</button><button class="bkb" onclick="clearSel('onsite')">Deselecteren</button></div></div>
-    <div class="fst" id="fst-o"><span>Filters actief</span><button class="fsc" onclick="clrF('onsite')">Wis filters</button></div>
-    <div class="tw"><table><thead>
-      <tr><th class="cbc"><input type="checkbox" onchange="selAll('onsite',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Location</th><th>Gemonteerd</th><th>Leverdatum</th><th>Foto + Pakbon</th><th>Actie</th></tr>
-      <tr class="fr"><td></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','commissie',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','asset',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','product',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','location',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','gemonteerd',this.value)"></td><td><input type="text" placeholder="Filter..." oninput="flt('onsite','leverdatum',this.value)"></td><td></td><td></td></tr>
-    </thead><tbody id="tb-o"></tbody></table></div>
-  </div>
-</div><!-- /pg-proj -->
+
+    <!-- TAB LEVERANCIER -->
+    <div id="tc-leverancier" class="tc">
+      <div class="panel" id="form-leverancier">
+        <div class="panel-t">Materiaal toevoegen</div>
+        <div class="fgrid">
+          <div class="fg" id="fg-lc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="lc" onblur="vf('lc','fg-lc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-la"><label>Asset Name <span class="rs">*</span></label><input type="text" id="la" onblur="vf('la','fg-la')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lp2"><label>Product Name <span class="rs">*</span></label><input type="text" id="lp2" onblur="vf('lp2','fg-lp2')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ladr"><label>Delivery Address <span class="rs">*</span></label><input type="text" id="ladr" onblur="vf('ladr','fg-ladr')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ldatum"><label>Lever/Retourdatum <span class="rs">*</span></label><input type="date" id="ldatum" onblur="vf('ldatum','fg-ldatum')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lret"><label>Retournummer <span class="rs">*</span></label><input type="text" id="lret" onblur="vf('lret','fg-lret')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-lf"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
+            <div class="fz" onclick="document.getElementById('lf-in').click()">
+              <span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
+              <input type="file" id="lf-in" accept="image/*" multiple onchange="addFotos(this,'lfp','lf-d','fg-lf')">
+            </div>
+            <div class="fpv" id="lfp"></div><span class="ferr">Minimaal 1 foto vereist</span>
+          </div>
+        </div>
+        <button class="btn bp" onclick="addLeverancier()">Toevoegen</button>
+      </div>
+      <div class="bb" id="bb-l"><span class="bi"><span id="cnt-l">0</span> geselecteerd</span>
+        <div class="bbs">
+          <button class="bkb" onclick="bulkPrev('leverancier')">&#8592; Naar Besteld</button>
+          <button class="bkb" onclick="bulkNext('leverancier')">Naar On Site &#8594;</button>
+          <button class="bkb" onclick="bulkDel('leverancier')">Verwijderen</button>
+          <button class="bkb" onclick="clearSel('leverancier')">Deselecteren</button>
+        </div>
+      </div>
+      <div class="fst" id="fst-l"><span>Filters actief</span><button class="fsc" onclick="clrF('leverancier')">Wis filters</button></div>
+      <div class="tw"><table><thead>
+        <tr><th class="cbc"><input type="checkbox" onchange="selAll('leverancier',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Delivery Address</th><th>Lever/Retourdatum</th><th>Retournummer</th><th>Foto + Pakbon</th><th>Actie</th></tr>
+        <tr class="fr"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','address',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','datum',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('leverancier','retour',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-l"></tbody></table></div>
+    </div>
+
+    <!-- TAB ON SITE -->
+    <div id="tc-onsite" class="tc">
+      <div class="panel" id="form-onsite">
+        <div class="panel-t">Materiaal toevoegen</div>
+        <div class="fgrid">
+          <div class="fg" id="fg-oc"><label>Commissienummer <span class="rs">*</span></label><input type="text" id="oc" onblur="vf('oc','fg-oc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-oa"><label>Asset Name <span class="rs">*</span></label><input type="text" id="oa" onblur="vf('oa','fg-oa')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-op"><label>Product Name <span class="rs">*</span></label><input type="text" id="op" onblur="vf('op','fg-op')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-oloc"><label>Location <span class="rs">*</span></label><input type="text" id="oloc" onblur="vf('oloc','fg-oloc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-ogem"><label>Gemonteerd <span class="rs">*</span></label>
+            <select id="ogem" onblur="vf('ogem','fg-ogem')" onchange="gcol(this)">
+              <option value="">-- Selecteer --</option>
+              <option value="Ja">Ja (niet beschikbaar)</option>
+              <option value="Nee">Nee (beschikbaar)</option>
+            </select>
+            <span class="vck">&#10003;</span><span class="ferr">Verplicht</span>
+          </div>
+          <div class="fg" id="fg-old"><label>Leverdatum <span class="rs">*</span></label><input type="date" id="old" onblur="vf('old','fg-old')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+          <div class="fg" id="fg-of"><label>Foto + Pakbon <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
+            <div class="fz" onclick="document.getElementById('of-in').click()">
+              <span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
+              <input type="file" id="of-in" accept="image/*" multiple onchange="addFotos(this,'ofp','of-d','fg-of')">
+            </div>
+            <div class="fpv" id="ofp"></div><span class="ferr">Minimaal 1 foto vereist</span>
+          </div>
+        </div>
+        <button class="btn bp" onclick="addOnsite()">Toevoegen</button>
+      </div>
+      <div class="bb" id="bb-o"><span class="bi"><span id="cnt-o">0</span> geselecteerd</span>
+        <div class="bbs">
+          <button class="bkb" onclick="bulkPrev('onsite')">&#8592; Naar Leverancier</button>
+          <button class="bkb" onclick="bulkDel('onsite')">Verwijderen</button>
+          <button class="bkb" onclick="clearSel('onsite')">Deselecteren</button>
+        </div>
+      </div>
+      <div class="fst" id="fst-o"><span>Filters actief</span><button class="fsc" onclick="clrF('onsite')">Wis filters</button></div>
+      <div class="tw"><table><thead>
+        <tr><th class="cbc"><input type="checkbox" onchange="selAll('onsite',this.checked)"></th><th>Commissienummer</th><th>Asset Name</th><th>Product Name</th><th>Location</th><th>Gemonteerd</th><th>Leverdatum</th><th>Foto + Pakbon</th><th>Actie</th></tr>
+        <tr class="fr"><td></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','commissie',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','asset',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','product',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','location',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','gemonteerd',this.value)"></td>
+          <td><input type="text" placeholder="Filter..." oninput="flt('onsite','leverdatum',this.value)"></td>
+          <td></td><td></td>
+        </tr>
+      </thead><tbody id="tb-o"></tbody></table></div>
+    </div>
+
+  </div><!-- /pg-proj -->
 </div><!-- /app -->
 
-<!-- FOTO MODAL -->
+<!-- FOTO LIGHTBOX -->
 <div id="fmov" class="fmov" onclick="closeFM()"><div class="fmc"><img id="fm-img" src="" alt="Foto"></div></div>
 
-<!-- CTX MENU -->
+<!-- CONTEXT MENU -->
 <div id="ctx" class="ctx">
   <div class="ci" onclick="ctxDo('edit')">Bewerken</div>
   <div class="ci" onclick="ctxDo('back')">Terug naar vorige stap</div>
@@ -296,491 +352,546 @@ tbody tr.sr{background:var(--plt)}tbody tr.erow td{padding:36px;text-align:cente
   <div class="ci danger" onclick="ctxDo('del')">Verwijderen</div>
 </div>
 
-<!-- POPUP B2L -->
+<!-- POPUP: BESTELD -> LEVERANCIER -->
 <div id="pop-b2l" class="ov"><div class="pb">
-  <h3>Geleverd bij leverancier</h3><p>Bevestig de leverdatum. Delivery address wordt automatisch overgenomen.</p>
+  <h3>Geleverd bij leverancier</h3>
+  <p>Bevestig de leverdatum. Het delivery address wordt automatisch overgenomen.</p>
   <div class="fg" id="fg-pb2l"><label>Leverdatum <span class="rs">*</span></label><input type="date" id="pb2l-d" onblur="vf('pb2l-d','fg-pb2l')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
   <div class="pa"><button class="btn bg2" onclick="clPop('pop-b2l')">Annuleren</button><button class="btn bp" onclick="confirmB2L()">Bevestigen</button></div>
 </div></div>
 
-<!-- POPUP L2O -->
+<!-- POPUP: LEVERANCIER -> ONSITE -->
 <div id="pop-l2o" class="ov"><div class="pb">
-  <h3>Afgeroepen – On Site</h3><p>Vul de locatie, montagestatus en leverdatum in.</p>
+  <h3>Afgeroepen – On Site</h3>
+  <p>Vul de locatie, montagestatus en leverdatum in.</p>
   <div style="display:grid;gap:12px">
     <div class="fg" id="fg-pl-loc"><label>Location <span class="rs">*</span></label><input type="text" id="pl-loc" placeholder="Locatie" onblur="vf('pl-loc','fg-pl-loc')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
-    <div class="fg" id="fg-pl-gem"><label>Gemonteerd <span class="rs">*</span></label><select id="pl-gem" onblur="vf('pl-gem','fg-pl-gem')" onchange="gcol(this)"><option value="">-- Selecteer --</option><option value="Ja">Ja (niet beschikbaar)</option><option value="Nee">Nee (beschikbaar)</option></select><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
+    <div class="fg" id="fg-pl-gem"><label>Gemonteerd <span class="rs">*</span></label>
+      <select id="pl-gem" onblur="vf('pl-gem','fg-pl-gem')" onchange="gcol(this)">
+        <option value="">-- Selecteer --</option>
+        <option value="Ja">Ja (niet beschikbaar)</option>
+        <option value="Nee">Nee (beschikbaar)</option>
+      </select>
+      <span class="vck">&#10003;</span><span class="ferr">Verplicht</span>
+    </div>
     <div class="fg" id="fg-pl-ld"><label>Leverdatum <span class="rs">*</span></label><input type="date" id="pl-ld" onblur="vf('pl-ld','fg-pl-ld')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
   </div>
   <div class="pa"><button class="btn bg2" onclick="clPop('pop-l2o')">Annuleren</button><button class="btn bp" onclick="confirmL2O()">Bevestigen</button></div>
 </div></div>
 
-<!-- POPUP O2L -->
+<!-- POPUP: ONSITE -> LEVERANCIER (retour) -->
 <div id="pop-o2l" class="ov"><div class="pb">
-  <h3>Retour naar leverancier</h3><p>Vul de retourgegevens in en voeg een foto toe.</p>
+  <h3>Retour naar leverancier</h3>
+  <p>Vul de retourgegevens in en voeg een foto toe.</p>
   <div style="display:grid;gap:12px">
     <div class="fg" id="fg-po-d"><label>Retourdatum <span class="rs">*</span></label><input type="date" id="po-d" onblur="vf('po-d','fg-po-d')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
     <div class="fg" id="fg-po-r"><label>Retournummer <span class="rs">*</span></label><input type="text" id="po-r" onblur="vf('po-r','fg-po-r')"><span class="vck">&#10003;</span><span class="ferr">Verplicht</span></div>
     <div class="fg" id="fg-po-f"><label>Foto <span class="rs">*</span> <span class="tlb">(max 4)</span></label>
-      <div class="fz" onclick="document.getElementById('po-fin').click()"><span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
-      <input type="file" id="po-fin" accept="image/*" multiple onchange="addFotos(this,'po-fv','po-fd','fg-po-f')"></div>
-      <div class="fpv" id="po-fv"></div><span class="ferr">Minimaal 1 foto vereist</span></div>
+      <div class="fz" onclick="document.getElementById('po-fin').click()">
+        <span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Klik om te uploaden</span>
+        <input type="file" id="po-fin" accept="image/*" multiple onchange="addFotos(this,'po-fv','po-fd','fg-po-f')">
+      </div>
+      <div class="fpv" id="po-fv"></div><span class="ferr">Minimaal 1 foto vereist</span>
+    </div>
   </div>
   <div class="pa"><button class="btn bg2" onclick="clPop('pop-o2l')">Annuleren</button><button class="btn bp" onclick="confirmO2L()">Bevestigen</button></div>
 </div></div>
 
-<!-- POPUP EDIT -->
+<!-- POPUP: EDIT ROW -->
 <div id="pop-edit" class="ov"><div class="pb wide">
-  <h3>Regel bewerken</h3><p>Pas de gegevens aan en sla op.</p>
+  <h3>Regel bewerken</h3>
+  <p>Pas de gegevens aan en sla op.</p>
   <div id="edit-fields" class="fgrid"></div>
   <div class="pa"><button class="btn bg2" onclick="clPop('pop-edit')">Annuleren</button><button class="btn bp" onclick="saveEdit()">Opslaan</button></div>
 </div></div>
 
-<script>
-// ── FIREBASE ──────────────────────────────────────────────
-var fbCfg={apiKey:"AIzaSyCcVZccan0-ImTAaTdfwqXeNj4oMX0Rvf8",authDomain:"logistiek-1cd70.firebaseapp.com",projectId:"logistiek-1cd70",storageBucket:"logistiek-1cd70.firebasestorage.app",messagingSenderId:"1010718581436",appId:"1:1010718581436:web:9d3d154acbc3a1eaf426b9",databaseURL:"https://logistiek-1cd70-default-rtdb.europe-west1.firebasedatabase.app"};
-firebase.initializeApp(fbCfg);
-var db=firebase.database();
+<!-- ══════════════════════════════════════════════════════════
+     FIREBASE + APP LOGIC (modular SDK v12, type="module")
+═══════════════════════════════════════════════════════════ -->
+<script type="module">
+import { initializeApp }           from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getDatabase, ref, set, onValue, remove, update }
+                                    from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
+
+// ── FIREBASE INIT ─────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCcVZccan0-ImTAaTdfwqXeNj4oMX0Rvf8",
+  authDomain: "logistiek-1cd70.firebaseapp.com",
+  databaseURL: "https://logistiek-1cd70-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "logistiek-1cd70",
+  storageBucket: "logistiek-1cd70.firebasestorage.app",
+  messagingSenderId: "1010718581436",
+  appId: "1:1010718581436:web:9d3d154acbc3a1eaf426b9"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db    = getDatabase(fbApp);
 
 // ── STATE ─────────────────────────────────────────────────
-var curUser=null,curProj=null;
-var inv={besteld:[],leverancier:[],onsite:[]};
-var fdata={'bf-d':[],'lf-d':[],'of-d':[],'po-fd':[]};
-var flts={besteld:{},leverancier:{},onsite:{}};
-var ctxSt={id:null,tab:null};
-var ppSt={id:null,bulk:false,ids:[]};
-var notifs=[];
-var editSt={tab:null,id:null};
-var editFotos=[];
-var projLn=null;
+let curUser = null, curProj = null;
+let inv = { besteld: [], leverancier: [], onsite: [] };
+let fdata = { 'bf-d': [], 'lf-d': [], 'of-d': [], 'po-fd': [] };
+let flts  = { besteld: {}, leverancier: {}, onsite: {} };
+let ctxSt = { id: null, tab: null };
+let ppSt  = { id: null, bulk: false, ids: [] };
+let notifs = [];
+let editSt = { tab: null, id: null };
+let editFotos = [];
+let projUnsub = null;
+
+// ── HELPERS ───────────────────────────────────────────────
+const gv  = id => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+const esc = s  => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const nid = ()  => Date.now() + Math.floor(Math.random() * 10000);
+const fmtD = v  => {
+  if (!v || v === '-' || v === '–') return '–';
+  const p = v.split('-');
+  return p.length === 3 ? `${p[2]}/${p[1]}/${p[0].slice(2)}` : v;
+};
+const arr  = v  => !v ? [] : Array.isArray(v) ? v : Object.values(v);
+const clean = o => { const r = {}; Object.keys(o).forEach(k => { if (k !== 'sel') r[k] = o[k]; }); return r; };
+function rset(ids, grps) {
+  ids.forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+  grps.forEach(id => { const g = document.getElementById(id); if (g) g.classList.remove('valid','invalid'); });
+}
+
+// ── VALIDATION ────────────────────────────────────────────
+window.vf = function(elId, grpId) {
+  const el = document.getElementById(elId), g = document.getElementById(grpId);
+  if (!el || !g) return false;
+  const ok = el.value.trim() !== '';
+  g.classList.remove('valid','invalid'); g.classList.add(ok ? 'valid' : 'invalid'); return ok;
+};
+function vfoto(store, grpId) {
+  const ok = fdata[store] && fdata[store].length > 0;
+  const g  = document.getElementById(grpId);
+  if (g) { g.classList.remove('valid','invalid'); g.classList.add(ok ? 'valid' : 'invalid'); }
+  return ok;
+}
+function vform(pairs) { let ok = true; pairs.forEach(p => { if (!window.vf(p[0], p[1])) ok = false; }); return ok; }
+window.gcol = function(s) { s.classList.remove('gja','gnee'); if (s.value==='Ja') s.classList.add('gja'); else if (s.value==='Nee') s.classList.add('gnee'); };
+function rfg(grpId, elId) {
+  const g = document.getElementById(grpId), e = document.getElementById(elId);
+  if (g) g.classList.remove('valid','invalid');
+  if (e) { e.value = ''; if (e.tagName === 'SELECT') e.classList.remove('gja','gnee'); }
+}
 
 // ── LOGIN ─────────────────────────────────────────────────
-function doLogin(){
-  var u=gv('lu').trim(),p=gv('lp').trim();
+window.doLogin = function() {
+  const u = gv('lu'), p = gv('lp');
   document.getElementById('lerr').classList.remove('on');
-  if(u==='001'&&p==='001'){curUser='main';startApp();}
-  else if(u==='002'&&p==='002'){curUser='side';startApp();}
+  if (u === '001' && p === '001')      { curUser = 'main'; startApp(); }
+  else if (u === '002' && p === '002') { curUser = 'side'; startApp(); }
   else document.getElementById('lerr').classList.add('on');
-}
-function startApp(){
-  document.getElementById('login-screen').classList.remove('on');
-  document.getElementById('app-hdr').style.display='flex';
-  document.getElementById('app').style.display='block';
-  document.getElementById('uname-lbl').textContent=curUser==='main'?'Gebruiker 001':'Gebruiker 002';
-  document.getElementById('udot').style.background=curUser==='main'?'var(--primary)':'var(--green)';
-  if(curUser==='side'){
+};
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-hdr').style.display = 'flex';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('uname-lbl').textContent = curUser === 'main' ? 'Gebruiker 001' : 'Gebruiker 002';
+  document.getElementById('udot').style.background = curUser === 'main' ? 'var(--primary)' : 'var(--green)';
+  if (curUser === 'side') {
     document.getElementById('su-banner').classList.add('on');
-    document.getElementById('nw-wrap').style.display='none';
-    document.getElementById('add-proj-panel').style.display='none';
+    document.getElementById('nw-wrap').style.display = 'none';
+    document.getElementById('add-proj-panel').style.display = 'none';
   }
-  listenProj();
+  listenProjects();
 }
-function doLogout(){
-  if(projLn)projLn.off();
-  curUser=null;curProj=null;inv={besteld:[],leverancier:[],onsite:[]};notifs=[];
-  document.getElementById('app-hdr').style.display='none';
-  document.getElementById('app').style.display='none';
+window.doLogout = function() {
+  if (projUnsub) projUnsub();
+  curUser = null; curProj = null;
+  inv = { besteld: [], leverancier: [], onsite: [] };
+  notifs = [];
+  document.getElementById('app-hdr').style.display = 'none';
+  document.getElementById('app').style.display = 'none';
   document.getElementById('su-banner').classList.remove('on');
-  document.getElementById('nw-wrap').style.display='';
-  document.getElementById('login-screen').classList.add('on');
-  document.getElementById('lu').value='';document.getElementById('lp').value='';
+  document.getElementById('nw-wrap').style.display = '';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('lu').value = ''; document.getElementById('lp').value = '';
   document.getElementById('lerr').classList.remove('on');
-}
+};
 
-// ── FIREBASE SYNC ─────────────────────────────────────────
-function listenProj(){
-  projLn=db.ref('projects');
-  projLn.on('value',function(snap){
-    window._fbP=snap.val()||{};
+// ── FIREBASE: LISTEN & SAVE ───────────────────────────────
+function listenProjects() {
+  const r = ref(db, 'projects');
+  projUnsub = onValue(r, snap => {
+    window._fbP = snap.val() || {};
     renderHome();
-    if(curProj&&window._fbP[curProj]){
-      var pi=window._fbP[curProj];
-      inv.besteld=arr(pi.besteld);inv.leverancier=arr(pi.leverancier);inv.onsite=arr(pi.onsite);
+    if (curProj && window._fbP[curProj]) {
+      const pi = window._fbP[curProj];
+      inv.besteld     = arr(pi.besteld);
+      inv.leverancier = arr(pi.leverancier);
+      inv.onsite      = arr(pi.onsite);
       renderAll();
     }
   });
 }
-function arr(v){if(!v)return[];if(Array.isArray(v))return v;return Object.values(v);}
-function saveP(){
-  if(!curProj)return;
-  var nm=(window._fbP&&window._fbP[curProj])?window._fbP[curProj].name:'';
-  db.ref('projects/'+curProj).set({name:nm,besteld:inv.besteld.map(clean),leverancier:inv.leverancier.map(clean),onsite:inv.onsite.map(clean)});
+function saveP() {
+  if (!curProj) return;
+  const name = (window._fbP && window._fbP[curProj]) ? window._fbP[curProj].name : '';
+  set(ref(db, 'projects/' + curProj), {
+    name,
+    besteld:     inv.besteld.map(clean),
+    leverancier: inv.leverancier.map(clean),
+    onsite:      inv.onsite.map(clean)
+  });
 }
-function clean(o){var r={};Object.keys(o).forEach(function(k){if(k!=='sel')r[k]=o[k];});return r;}
 
 // ── PROJECTS ──────────────────────────────────────────────
-function renderHome(){
-  var g=document.getElementById('pgrid'),d=window._fbP||{},ks=Object.keys(d);
-  if(!ks.length){g.innerHTML='<div style="grid-column:1/-1;padding:48px 0;text-align:center;color:var(--text3)">Geen projecten aanwezig</div>';return;}
-  g.innerHTML='';
-  ks.forEach(function(id){
-    var p=d[id],bl=arr(p.besteld).length,ll=arr(p.leverancier).length,ol=arr(p.onsite).length;
-    var div=document.createElement('div');div.className='pcard';
-    div.innerHTML='<div class="pcard-h"><h3>'+esc(p.name)+'</h3>'
-      +(curUser==='main'?'<button class="btn bds bsm" onclick="event.stopPropagation();delProj(''+id+'')">Verwijderen</button>':'')
-      +'</div><div class="psts"><div class="pst"><div class="psn">'+bl+'</div><div class="psl">Besteld</div></div>'
-      +'<div class="pst"><div class="psn">'+ll+'</div><div class="psl">Leverancier</div></div>'
-      +'<div class="pst"><div class="psn">'+ol+'</div><div class="psl">On Site</div></div></div>'
-      +'<div class="pfoot"><button class="btn bp" style="width:100%" onclick="event.stopPropagation();openProj(''+id+'')">Project openen</button></div>';
-    div.addEventListener('click',function(){openProj(id);});
+function renderHome() {
+  const g = document.getElementById('pgrid'), d = window._fbP || {}, ks = Object.keys(d);
+  if (!ks.length) { g.innerHTML = '<div style="grid-column:1/-1;padding:48px 0;text-align:center;color:var(--text3)">Geen projecten aanwezig</div>'; return; }
+  g.innerHTML = '';
+  ks.forEach(id => {
+    const p = d[id], bl = arr(p.besteld).length, ll = arr(p.leverancier).length, ol = arr(p.onsite).length;
+    const div = document.createElement('div'); div.className = 'pcard';
+    div.innerHTML = `<div class="pcard-h"><h3>${esc(p.name)}</h3>${curUser === 'main' ? `<button class="btn bds bsm" onclick="event.stopPropagation();delProj('${id}')">Verwijderen</button>` : ''}</div>
+      <div class="psts">
+        <div class="pst"><div class="psn">${bl}</div><div class="psl">Besteld</div></div>
+        <div class="pst"><div class="psn">${ll}</div><div class="psl">Leverancier</div></div>
+        <div class="pst"><div class="psn">${ol}</div><div class="psl">On Site</div></div>
+      </div>
+      <div class="pfoot"><button class="btn bp" style="width:100%" onclick="event.stopPropagation();openProj('${id}')">Project openen</button></div>`;
+    div.addEventListener('click', () => openProj(id));
     g.appendChild(div);
   });
 }
-function addProject(){
-  if(curUser!=='main')return;
-  var n=gv('pname-inp').trim(),fg=document.getElementById('fg-pn');
+window.addProject = function() {
+  if (curUser !== 'main') return;
+  const n = gv('pname-inp'), fg = document.getElementById('fg-pn');
   fg.classList.remove('valid','invalid');
-  if(!n){fg.classList.add('invalid');return;}
-  var id='p'+Date.now();
-  db.ref('projects/'+id).set({name:n,besteld:[],leverancier:[],onsite:[]});
-  document.getElementById('pname-inp').value='';fg.classList.remove('valid','invalid');
-}
-function delProj(id){
-  if(curUser!=='main')return;
-  var p=window._fbP?window._fbP[id]:null;
-  if(!confirm('Verwijder project "'+(p?p.name:id)+'"?'))return;
-  db.ref('projects/'+id).remove();
-}
-function openProj(id){
-  curProj=id;
-  var p=window._fbP?window._fbP[id]:{};
-  inv.besteld=arr(p?p.besteld:null);inv.leverancier=arr(p?p.leverancier:null);inv.onsite=arr(p?p.onsite:null);
-  document.getElementById('proj-title').textContent=p?p.name:id;
-  swPage('pg-proj');applyRole();renderAll();
-}
-function applyRole(){
-  ['form-besteld','form-leverancier','form-onsite'].forEach(function(id){
-    var el=document.getElementById(id);if(el)el.style.display=curUser==='main'?'':'none';
+  if (!n) { fg.classList.add('invalid'); return; }
+  const id = 'p' + Date.now();
+  set(ref(db, 'projects/' + id), { name: n, besteld: [], leverancier: [], onsite: [] });
+  document.getElementById('pname-inp').value = ''; fg.classList.remove('valid','invalid');
+};
+window.delProj = function(id) {
+  if (curUser !== 'main') return;
+  const p = window._fbP ? window._fbP[id] : null;
+  if (!confirm(`Verwijder project "${p ? p.name : id}"?`)) return;
+  remove(ref(db, 'projects/' + id));
+};
+window.openProj = function(id) {
+  curProj = id;
+  const p = window._fbP ? window._fbP[id] : {};
+  inv.besteld     = arr(p ? p.besteld : null);
+  inv.leverancier = arr(p ? p.leverancier : null);
+  inv.onsite      = arr(p ? p.onsite : null);
+  document.getElementById('proj-title').textContent = p ? p.name : id;
+  swPage('pg-proj'); applyRole(); renderAll();
+};
+function applyRole() {
+  ['form-besteld','form-leverancier','form-onsite'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = curUser === 'main' ? '' : 'none';
   });
 }
-function goHome(){curProj=null;swPage('pg-home');}
+window.goHome = function() { curProj = null; swPage('pg-home'); };
 
 // ── NAVIGATION ────────────────────────────────────────────
-function swPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.getElementById(id).classList.add('active');}
-function swTab(name,el){document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});document.querySelectorAll('.tc').forEach(function(c){c.classList.remove('active');});el.classList.add('active');document.getElementById('tc-'+name).classList.add('active');}
-
-// ── DATE FORMAT ───────────────────────────────────────────
-function fmtD(v){
-  if(!v||v==='-'||v==='–')return '–';
-  var p=v.split('-');
-  if(p.length===3)return p[2]+'/'+p[1]+'/'+p[0].slice(2);
-  return v;
-}
-
-// ── VALIDATION ────────────────────────────────────────────
-function vf(elId,grpId){
-  var el=document.getElementById(elId),g=document.getElementById(grpId);
-  if(!el||!g)return false;
-  var ok=el.value.trim()!=='';
-  g.classList.remove('valid','invalid');g.classList.add(ok?'valid':'invalid');return ok;
-}
-function vfoto(store,grpId){
-  var ok=fdata[store]&&fdata[store].length>0,g=document.getElementById(grpId);
-  if(g){g.classList.remove('valid','invalid');g.classList.add(ok?'valid':'invalid');}return ok;
-}
-function vform(pairs){var ok=true;pairs.forEach(function(p){if(!vf(p[0],p[1]))ok=false;});return ok;}
-function gcol(s){s.classList.remove('gja','gnee');if(s.value==='Ja')s.classList.add('gja');else if(s.value==='Nee')s.classList.add('gnee');}
-function rfg(grpId,elId){var g=document.getElementById(grpId),e=document.getElementById(elId);if(g)g.classList.remove('valid','invalid');if(e){e.value='';if(e.tagName==='SELECT')e.classList.remove('gja','gnee');}}
+function swPage(id) { document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+window.swTab = function(name, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tc').forEach(c => c.classList.remove('active'));
+  el.classList.add('active'); document.getElementById('tc-' + name).classList.add('active');
+};
 
 // ── FOTO UPLOAD ───────────────────────────────────────────
-function addFotos(input,prevId,store,grpId){
-  if(!fdata[store])fdata[store]=[];
-  var rem=4-fdata[store].length,files=Array.from(input.files),use=files.slice(0,rem);
-  if(files.length>rem)alert('Max 4 fotos. Enkel '+rem+' toegevoegd.');
-  use.forEach(function(f){var r=new FileReader();r.onload=function(e){fdata[store].push(e.target.result);rpv(store,prevId,grpId);};r.readAsDataURL(f);});
-  input.value='';
-}
-function rpv(store,prevId,grpId){
-  var c=document.getElementById(prevId);if(!c)return;c.innerHTML='';
-  (fdata[store]||[]).forEach(function(src,i){
-    var w=document.createElement('div');w.className='fth';
-    w.innerHTML='<img src="'+src+'" alt="foto"><button class="frm" onclick="rmF(''+store+'',''+prevId+'',''+grpId+'','+i+')">&#215;</button>';
+window.addFotos = function(input, prevId, store, grpId) {
+  if (!fdata[store]) fdata[store] = [];
+  const rem = 4 - fdata[store].length, files = Array.from(input.files), use = files.slice(0, rem);
+  if (files.length > rem) alert(`Max 4 fotos. Enkel ${rem} toegevoegd.`);
+  use.forEach(f => { const r = new FileReader(); r.onload = e => { fdata[store].push(e.target.result); rpv(store, prevId, grpId); }; r.readAsDataURL(f); });
+  input.value = '';
+};
+function rpv(store, prevId, grpId) {
+  const c = document.getElementById(prevId); if (!c) return; c.innerHTML = '';
+  (fdata[store] || []).forEach((src, i) => {
+    const w = document.createElement('div'); w.className = 'fth';
+    w.innerHTML = `<img src="${src}" alt="foto"><button class="frm" onclick="rmF('${store}','${prevId}','${grpId}',${i})">&#215;</button>`;
     c.appendChild(w);
   });
-  vfoto(store,grpId);
+  vfoto(store, grpId);
 }
-function rmF(store,prevId,grpId,i){fdata[store].splice(i,1);rpv(store,prevId,grpId);}
-function clrFS(store,prevId){fdata[store]=[];var c=document.getElementById(prevId);if(c)c.innerHTML='';}
+window.rmF = function(store, prevId, grpId, i) { fdata[store].splice(i, 1); rpv(store, prevId, grpId); };
+function clrFS(store, prevId) { fdata[store] = []; const c = document.getElementById(prevId); if (c) c.innerHTML = ''; }
 
 // ── ADD ROWS ──────────────────────────────────────────────
-function addBesteld(){
-  if(curUser!=='main')return;
-  if(!vform([['bc','fg-bc'],['ba','fg-ba'],['bp','fg-bp'],['badr','fg-badr'],['bd','fg-bd']])||!vfoto('bf-d','fg-bf'))return;
-  inv.besteld.push({id:nid(),commissie:gv('bc'),asset:gv('ba'),product:gv('bp'),address:gv('badr'),date:gv('bd'),fotos:[].concat(fdata['bf-d'])});
-  rset(['bc','ba','bp','badr','bd'],['fg-bc','fg-ba','fg-bp','fg-badr','fg-bd','fg-bf']);clrFS('bf-d','bfp');saveP();
-}
-function addLeverancier(){
-  if(curUser!=='main')return;
-  if(!vform([['lc','fg-lc'],['la','fg-la'],['lp','fg-lp'],['ladr','fg-ladr'],['ldatum','fg-ldatum'],['lret','fg-lret']])||!vfoto('lf-d','fg-lf'))return;
-  inv.leverancier.push({id:nid(),commissie:gv('lc'),asset:gv('la'),product:gv('lp'),address:gv('ladr'),datum:gv('ldatum'),retour:gv('lret'),fotos:[].concat(fdata['lf-d'])});
-  rset(['lc','la','lp','ladr','ldatum','lret'],['fg-lc','fg-la','fg-lp','fg-ladr','fg-ldatum','fg-lret','fg-lf']);clrFS('lf-d','lfp');saveP();
-}
-function addOnsite(){
-  if(curUser!=='main')return;
-  if(!vform([['oc','fg-oc'],['oa','fg-oa'],['op','fg-op'],['oloc','fg-oloc'],['ogem','fg-ogem'],['old','fg-old']])||!vfoto('of-d','fg-of'))return;
-  inv.onsite.push({id:nid(),commissie:gv('oc'),asset:gv('oa'),product:gv('op'),location:gv('oloc'),gemonteerd:gv('ogem'),leverdatum:gv('old'),fotos:[].concat(fdata['of-d'])});
-  rset(['oc','oa','op','oloc','old'],['fg-oc','fg-oa','fg-op','fg-oloc','fg-ogem','fg-old','fg-of']);
-  var s=document.getElementById('ogem');if(s){s.value='';s.classList.remove('gja','gnee');}
-  clrFS('of-d','ofp');saveP();
-}
+window.addBesteld = function() {
+  if (curUser !== 'main') return;
+  if (!vform([['bc','fg-bc'],['ba','fg-ba'],['bp','fg-bp'],['badr','fg-badr'],['bd','fg-bd']]) || !vfoto('bf-d','fg-bf')) return;
+  inv.besteld.push({ id: nid(), commissie: gv('bc'), asset: gv('ba'), product: gv('bp'), address: gv('badr'), date: gv('bd'), fotos: [...fdata['bf-d']] });
+  rset(['bc','ba','bp','badr','bd'], ['fg-bc','fg-ba','fg-bp','fg-badr','fg-bd','fg-bf']); clrFS('bf-d','bfp'); saveP();
+};
+window.addLeverancier = function() {
+  if (curUser !== 'main') return;
+  if (!vform([['lc','fg-lc'],['la','fg-la'],['lp2','fg-lp2'],['ladr','fg-ladr'],['ldatum','fg-ldatum'],['lret','fg-lret']]) || !vfoto('lf-d','fg-lf')) return;
+  inv.leverancier.push({ id: nid(), commissie: gv('lc'), asset: gv('la'), product: gv('lp2'), address: gv('ladr'), datum: gv('ldatum'), retour: gv('lret'), fotos: [...fdata['lf-d']] });
+  rset(['lc','la','lp2','ladr','ldatum','lret'], ['fg-lc','fg-la','fg-lp2','fg-ladr','fg-ldatum','fg-lret','fg-lf']); clrFS('lf-d','lfp'); saveP();
+};
+window.addOnsite = function() {
+  if (curUser !== 'main') return;
+  if (!vform([['oc','fg-oc'],['oa','fg-oa'],['op','fg-op'],['oloc','fg-oloc'],['ogem','fg-ogem'],['old','fg-old']]) || !vfoto('of-d','fg-of')) return;
+  inv.onsite.push({ id: nid(), commissie: gv('oc'), asset: gv('oa'), product: gv('op'), location: gv('oloc'), gemonteerd: gv('ogem'), leverdatum: gv('old'), fotos: [...fdata['of-d']] });
+  rset(['oc','oa','op','oloc','old'], ['fg-oc','fg-oa','fg-op','fg-oloc','fg-ogem','fg-old','fg-of']);
+  const s = document.getElementById('ogem'); if (s) { s.value = ''; s.classList.remove('gja','gnee'); }
+  clrFS('of-d','ofp'); saveP();
+};
 
 // ── RENDER ────────────────────────────────────────────────
-function fotH(fotos){
-  if(!fotos||!fotos.length)return '<span style="color:var(--text3)">–</span>';
-  return '<div class="frow">'+fotos.map(function(s){return '<img src="'+s+'" class="ft" onclick="openFM(''+s+'');event.stopPropagation();" alt="foto" loading="lazy">';}).join('')+'</div>';
+function fotH(fotos) {
+  if (!fotos || !fotos.length) return '<span style="color:var(--text3)">–</span>';
+  return '<div class="frow">' + fotos.map(s => `<img src="${s}" class="ft" onclick="openFM('${s}');event.stopPropagation();" alt="foto" loading="lazy">`).join('') + '</div>';
 }
-function gemB(v){if(v==='Ja')return '<span class="bja">Ja</span>';if(v==='Nee')return '<span class="bnee">Nee</span>';return v||'–';}
-function apF(tab,items){var f=flts[tab];return items.filter(function(item){return Object.keys(f).every(function(k){return(item[k]||'').toString().toLowerCase().includes(f[k]);});});}
+function gemB(v) { if (v==='Ja') return '<span class="bja">Ja</span>'; if (v==='Nee') return '<span class="bnee">Nee</span>'; return v||'–'; }
+function apF(tab, items) { const f = flts[tab]; return items.filter(item => Object.keys(f).every(k => (item[k]||'').toString().toLowerCase().includes(f[k]))); }
 
-function renderB(){
-  var tb=document.getElementById('tb-b'),items=apF('besteld',inv.besteld);
-  if(!items.length){tb.innerHTML='<tr class="erow"><td colspan="8">Geen items</td></tr>';updSt();return;}
-  tb.innerHTML=items.map(function(it){
-    return '<tr class="'+(it.sel?'sr':'')+'" ondblclick="openEdit('besteld','+it.id+')" oncontextmenu="showCtx(event,'+it.id+','besteld')">'
-      +'<td class="cbc"><input type="checkbox" '+(it.sel?'checked':'')+' onchange="togS('besteld','+it.id+',this.checked)" onclick="event.stopPropagation()"></td>'
-      +'<td>'+esc(it.commissie)+'</td><td>'+esc(it.asset)+'</td><td>'+esc(it.product)+'</td>'
-      +'<td>'+esc(it.address||'–')+'</td><td>'+fmtD(it.date)+'</td>'
-      +'<td>'+fotH(it.fotos)+'</td>'
-      +(curUser==='main'?'<td><button class="btn bsc bsm" onclick="trigB2L('+it.id+')">Geleverd</button></td>':'<td></td>')
-      +'</tr>';
-  }).join('');updSt();
+function renderB() {
+  const tb = document.getElementById('tb-b'), items = apF('besteld', inv.besteld);
+  if (!items.length) { tb.innerHTML = '<tr class="erow"><td colspan="8">Geen items</td></tr>'; updSt(); return; }
+  tb.innerHTML = items.map(it => `
+    <tr class="${it.sel?'sr':''}" ondblclick="openEdit('besteld',${it.id})" oncontextmenu="showCtx(event,${it.id},'besteld')">
+      <td class="cbc"><input type="checkbox" ${it.sel?'checked':''} onchange="togS('besteld',${it.id},this.checked)" onclick="event.stopPropagation()"></td>
+      <td>${esc(it.commissie)}</td><td>${esc(it.asset)}</td><td>${esc(it.product)}</td>
+      <td>${esc(it.address||'–')}</td><td>${fmtD(it.date)}</td>
+      <td>${fotH(it.fotos)}</td>
+      <td>${curUser==='main'?`<button class="btn bsc bsm" onclick="trigB2L(${it.id})">Geleverd</button>`:'&nbsp;'}</td>
+    </tr>`).join('');
+  updSt();
 }
-function renderL(){
-  var tb=document.getElementById('tb-l'),items=apF('leverancier',inv.leverancier);
-  if(!items.length){tb.innerHTML='<tr class="erow"><td colspan="9">Geen items</td></tr>';updSt();return;}
-  tb.innerHTML=items.map(function(it){
-    return '<tr class="'+(it.sel?'sr':'')+'" ondblclick="openEdit('leverancier','+it.id+')" oncontextmenu="showCtx(event,'+it.id+','leverancier')">'
-      +'<td class="cbc"><input type="checkbox" '+(it.sel?'checked':'')+' onchange="togS('leverancier','+it.id+',this.checked)" onclick="event.stopPropagation()"></td>'
-      +'<td>'+esc(it.commissie)+'</td><td>'+esc(it.asset)+'</td><td>'+esc(it.product)+'</td>'
-      +'<td>'+esc(it.address||'–')+'</td><td>'+fmtD(it.datum)+'</td><td>'+esc(it.retour||'–')+'</td>'
-      +'<td>'+fotH(it.fotos)+'</td>'
-      +'<td><button class="btn bbk bsm" onclick="trigL2O('+it.id+')">Afroepen</button></td>'
-      +'</tr>';
-  }).join('');updSt();
+function renderL() {
+  const tb = document.getElementById('tb-l'), items = apF('leverancier', inv.leverancier);
+  if (!items.length) { tb.innerHTML = '<tr class="erow"><td colspan="9">Geen items</td></tr>'; updSt(); return; }
+  tb.innerHTML = items.map(it => `
+    <tr class="${it.sel?'sr':''}" ondblclick="openEdit('leverancier',${it.id})" oncontextmenu="showCtx(event,${it.id},'leverancier')">
+      <td class="cbc"><input type="checkbox" ${it.sel?'checked':''} onchange="togS('leverancier',${it.id},this.checked)" onclick="event.stopPropagation()"></td>
+      <td>${esc(it.commissie)}</td><td>${esc(it.asset)}</td><td>${esc(it.product)}</td>
+      <td>${esc(it.address||'–')}</td><td>${fmtD(it.datum)}</td><td>${esc(it.retour||'–')}</td>
+      <td>${fotH(it.fotos)}</td>
+      <td><button class="btn bbk bsm" onclick="trigL2O(${it.id})">Afroepen</button></td>
+    </tr>`).join('');
+  updSt();
 }
-function renderO(){
-  var tb=document.getElementById('tb-o'),items=apF('onsite',inv.onsite);
-  if(!items.length){tb.innerHTML='<tr class="erow"><td colspan="9">Geen items</td></tr>';updSt();return;}
-  tb.innerHTML=items.map(function(it){
-    return '<tr class="'+(it.sel?'sr':'')+'" ondblclick="openEdit('onsite','+it.id+')" oncontextmenu="showCtx(event,'+it.id+','onsite')">'
-      +'<td class="cbc"><input type="checkbox" '+(it.sel?'checked':'')+' onchange="togS('onsite','+it.id+',this.checked)" onclick="event.stopPropagation()"></td>'
-      +'<td>'+esc(it.commissie)+'</td><td>'+esc(it.asset)+'</td><td>'+esc(it.product)+'</td>'
-      +'<td>'+esc(it.location||'–')+'</td><td>'+gemB(it.gemonteerd)+'</td><td>'+fmtD(it.leverdatum)+'</td>'
-      +'<td>'+fotH(it.fotos)+'</td>'
-      +(curUser==='main'?'<td><button class="btn bbk bsm" onclick="trigO2L('+it.id+')">Retour</button></td>':'<td></td>')
-      +'</tr>';
-  }).join('');updSt();
+function renderO() {
+  const tb = document.getElementById('tb-o'), items = apF('onsite', inv.onsite);
+  if (!items.length) { tb.innerHTML = '<tr class="erow"><td colspan="9">Geen items</td></tr>'; updSt(); return; }
+  tb.innerHTML = items.map(it => `
+    <tr class="${it.sel?'sr':''}" ondblclick="openEdit('onsite',${it.id})" oncontextmenu="showCtx(event,${it.id},'onsite')">
+      <td class="cbc"><input type="checkbox" ${it.sel?'checked':''} onchange="togS('onsite',${it.id},this.checked)" onclick="event.stopPropagation()"></td>
+      <td>${esc(it.commissie)}</td><td>${esc(it.asset)}</td><td>${esc(it.product)}</td>
+      <td>${esc(it.location||'–')}</td><td>${gemB(it.gemonteerd)}</td><td>${fmtD(it.leverdatum)}</td>
+      <td>${fotH(it.fotos)}</td>
+      <td>${curUser==='main'?`<button class="btn bbk bsm" onclick="trigO2L(${it.id})">Retour</button>`:'&nbsp;'}</td>
+    </tr>`).join('');
+  updSt();
 }
-function renderAll(){renderB();renderL();renderO();}
-function renderTab(t){if(t==='besteld')renderB();else if(t==='leverancier')renderL();else renderO();}
-function updSt(){document.getElementById('sn-b').textContent=inv.besteld.length;document.getElementById('sn-l').textContent=inv.leverancier.length;document.getElementById('sn-o').textContent=inv.onsite.length;}
+function renderAll()  { renderB(); renderL(); renderO(); }
+function renderTab(t) { if (t==='besteld') renderB(); else if (t==='leverancier') renderL(); else renderO(); }
+function updSt() {
+  document.getElementById('sn-b').textContent = inv.besteld.length;
+  document.getElementById('sn-l').textContent = inv.leverancier.length;
+  document.getElementById('sn-o').textContent = inv.onsite.length;
+}
 
 // ── EDIT (double click) ───────────────────────────────────
-function openEdit(tab,id){
-  var item=inv[tab].find(function(i){return i.id==id;});if(!item)return;
-  editSt={tab:tab,id:id};editFotos=item.fotos?[].concat(item.fotos):[];
-  var ef=document.getElementById('edit-fields');ef.innerHTML='';
-  var fields=tabFields(tab);
-  fields.forEach(function(f){
-    var div=document.createElement('div');div.className='fg';
-    if(f.type==='select'){
-      div.innerHTML='<label>'+f.label+'</label>'
-        +'<select id="ef-'+f.key+'" onchange="gcol(this)">'
-        +'<option value="Ja"'+(item[f.key]==='Ja'?' selected':'')+'>Ja (niet beschikbaar)</option>'
-        +'<option value="Nee"'+(item[f.key]==='Nee'?' selected':'')+'>Nee (beschikbaar)</option>'
-        +'</select>';
-    }else if(f.type==='date'){
-      div.innerHTML='<label>'+f.label+'</label><input type="date" id="ef-'+f.key+'" value="'+(item[f.key]||'')+'">';
-    }else{
-      div.innerHTML='<label>'+f.label+'</label><input type="text" id="ef-'+f.key+'" value="'+esc(item[f.key]||'')+'">';
+window.openEdit = function(tab, id) {
+  const item = inv[tab].find(i => i.id == id); if (!item) return;
+  editSt = { tab, id }; editFotos = item.fotos ? [...item.fotos] : [];
+  const ef = document.getElementById('edit-fields'); ef.innerHTML = '';
+  tabFields(tab).forEach(f => {
+    const div = document.createElement('div'); div.className = 'fg';
+    if (f.type === 'select') {
+      div.innerHTML = `<label>${f.label}</label>
+        <select id="ef-${f.key}" onchange="gcol(this)">
+          <option value="Ja"${item[f.key]==='Ja'?' selected':''}>Ja (niet beschikbaar)</option>
+          <option value="Nee"${item[f.key]==='Nee'?' selected':''}>Nee (beschikbaar)</option>
+        </select>`;
+    } else if (f.type === 'date') {
+      div.innerHTML = `<label>${f.label}</label><input type="date" id="ef-${f.key}" value="${item[f.key]||''}">`;
+    } else {
+      div.innerHTML = `<label>${f.label}</label><input type="text" id="ef-${f.key}" value="${esc(item[f.key]||'')}">`;
     }
     ef.appendChild(div);
-    if(f.type==='select'){setTimeout(function(){var s=document.getElementById('ef-'+f.key);if(s)gcol(s);},10);}
+    if (f.type === 'select') setTimeout(() => { const s = document.getElementById('ef-'+f.key); if (s) window.gcol(s); }, 10);
   });
-  var fd=document.createElement('div');fd.className='fg';fd.style.gridColumn='1/-1';
-  fd.innerHTML='<label>Foto + Pakbon <span class="tlb">(max 4)</span></label>'
-    +'<div class="fz" onclick="document.getElementById('ef-fin').click()"><span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Toevoegen</span>'
-    +'<input type="file" id="ef-fin" accept="image/*" multiple onchange="efAdd(this)"></div>'
-    +'<div class="fpv" id="ef-fpv"></div>';
-  ef.appendChild(fd);
-  renderEFP();openOv('pop-edit');
+  const fd = document.createElement('div'); fd.className = 'fg'; fd.style.gridColumn = '1/-1';
+  fd.innerHTML = `<label>Foto + Pakbon <span class="tlb">(max 4)</span></label>
+    <div class="fz" onclick="document.getElementById('ef-fin').click()">
+      <span class="flbl"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Toevoegen</span>
+      <input type="file" id="ef-fin" accept="image/*" multiple onchange="efAdd(this)">
+    </div>
+    <div class="fpv" id="ef-fpv"></div>`;
+  ef.appendChild(fd); renderEFP(); openOv('pop-edit');
+};
+function tabFields(tab) {
+  if (tab === 'besteld')     return [{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'address',label:'Delivery Address',type:'text'},{key:'date',label:'Delivery Date',type:'date'}];
+  if (tab === 'leverancier') return [{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'address',label:'Delivery Address',type:'text'},{key:'datum',label:'Lever/Retourdatum',type:'date'},{key:'retour',label:'Retournummer',type:'text'}];
+  return [{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'location',label:'Location',type:'text'},{key:'gemonteerd',label:'Gemonteerd',type:'select'},{key:'leverdatum',label:'Leverdatum',type:'date'}];
 }
-function tabFields(tab){
-  if(tab==='besteld')return[{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'address',label:'Delivery Address',type:'text'},{key:'date',label:'Delivery Date',type:'date'}];
-  if(tab==='leverancier')return[{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'address',label:'Delivery Address',type:'text'},{key:'datum',label:'Lever/Retourdatum',type:'date'},{key:'retour',label:'Retournummer',type:'text'}];
-  return[{key:'commissie',label:'Commissienummer',type:'text'},{key:'asset',label:'Asset Name',type:'text'},{key:'product',label:'Product Name',type:'text'},{key:'location',label:'Location',type:'text'},{key:'gemonteerd',label:'Gemonteerd',type:'select'},{key:'leverdatum',label:'Leverdatum',type:'date'}];
+window.efAdd = function(input) {
+  const rem = 4 - editFotos.length, files = Array.from(input.files), use = files.slice(0, rem);
+  if (files.length > rem) alert(`Max 4 fotos. Enkel ${rem} toegevoegd.`);
+  use.forEach(f => { const r = new FileReader(); r.onload = e => { editFotos.push(e.target.result); renderEFP(); }; r.readAsDataURL(f); });
+  input.value = '';
+};
+function renderEFP() {
+  const c = document.getElementById('ef-fpv'); if (!c) return; c.innerHTML = '';
+  editFotos.forEach((src, i) => { const w = document.createElement('div'); w.className = 'fth'; w.innerHTML = `<img src="${src}" alt="foto"><button class="frm" onclick="efRm(${i})">&#215;</button>`; c.appendChild(w); });
 }
-function efAdd(input){
-  var rem=4-editFotos.length,files=Array.from(input.files),use=files.slice(0,rem);
-  if(files.length>rem)alert('Max 4 fotos. Enkel '+rem+' toegevoegd.');
-  use.forEach(function(f){var r=new FileReader();r.onload=function(e){editFotos.push(e.target.result);renderEFP();};r.readAsDataURL(f);});
-  input.value='';
-}
-function renderEFP(){
-  var c=document.getElementById('ef-fpv');if(!c)return;c.innerHTML='';
-  editFotos.forEach(function(src,i){var w=document.createElement('div');w.className='fth';w.innerHTML='<img src="'+src+'" alt="foto"><button class="frm" onclick="efRm('+i+')">&#215;</button>';c.appendChild(w);});
-}
-function efRm(i){editFotos.splice(i,1);renderEFP();}
-function saveEdit(){
-  var tab=editSt.tab,id=editSt.id,item=inv[tab].find(function(i){return i.id==id;});
-  if(!item){clPop('pop-edit');return;}
-  tabFields(tab).forEach(function(f){var el=document.getElementById('ef-'+f.key);if(el)item[f.key]=el.value.trim();});
-  item.fotos=editFotos;clPop('pop-edit');saveP();
-}
+window.efRm = function(i) { editFotos.splice(i, 1); renderEFP(); };
+window.saveEdit = function() {
+  const { tab, id } = editSt;
+  const item = inv[tab].find(i => i.id == id); if (!item) { clPop('pop-edit'); return; }
+  tabFields(tab).forEach(f => { const el = document.getElementById('ef-'+f.key); if (el) item[f.key] = el.value.trim(); });
+  item.fotos = editFotos; clPop('pop-edit'); saveP();
+};
 
-// ── POPUPS ────────────────────────────────────────────────
-function openOv(id){document.getElementById(id).classList.add('on');}
-function clPop(id){document.getElementById(id).classList.remove('on');ppSt={id:null,bulk:false,ids:[]};}
+// ── MODALS ────────────────────────────────────────────────
+function openOv(id) { document.getElementById(id).classList.add('on'); }
+window.clPop = function(id) { document.getElementById(id).classList.remove('on'); ppSt = { id: null, bulk: false, ids: [] }; };
 
-function trigB2L(id){ppSt.id=id;ppSt.bulk=false;rfg('fg-pb2l','pb2l-d');openOv('pop-b2l');}
-function confirmB2L(){
-  if(!vf('pb2l-d','fg-pb2l'))return;
-  var datum=gv('pb2l-d'),ids=ppSt.bulk?ppSt.ids:[ppSt.id];
-  ids.forEach(function(id){
-    var it=inv.besteld.find(function(i){return i.id==id;});if(!it)return;
-    inv.besteld=inv.besteld.filter(function(i){return i.id!=id;});
-    inv.leverancier.push({id:nid(),commissie:it.commissie,asset:it.asset,product:it.product,address:it.address,datum:datum,retour:'',fotos:it.fotos||[]});
+// B → L
+window.trigB2L = function(id) { ppSt.id = id; ppSt.bulk = false; rfg('fg-pb2l','pb2l-d'); openOv('pop-b2l'); };
+window.confirmB2L = function() {
+  if (!window.vf('pb2l-d','fg-pb2l')) return;
+  const datum = gv('pb2l-d'), ids = ppSt.bulk ? ppSt.ids : [ppSt.id];
+  ids.forEach(id => {
+    const it = inv.besteld.find(i => i.id == id); if (!it) return;
+    inv.besteld = inv.besteld.filter(i => i.id != id);
+    inv.leverancier.push({ id: nid(), commissie: it.commissie, asset: it.asset, product: it.product, address: it.address, datum, retour: '', fotos: it.fotos || [] });
   });
-  clPop('pop-b2l');saveP();
-}
+  clPop('pop-b2l'); saveP();
+};
 
-function trigL2O(id){
-  ppSt.id=id;ppSt.bulk=false;
-  ['fg-pl-loc','pl-loc','fg-pl-gem','pl-gem','fg-pl-ld','pl-ld'].forEach(function(x,i){
-    if(i%2===0){var g=document.getElementById(x);if(g)g.classList.remove('valid','invalid');}
-    else{var e=document.getElementById(x);if(e){e.value='';if(e.tagName==='SELECT')e.classList.remove('gja','gnee');}}
+// L → O
+window.trigL2O = function(id) {
+  ppSt.id = id; ppSt.bulk = false;
+  ['fg-pl-loc','pl-loc','fg-pl-gem','pl-gem','fg-pl-ld','pl-ld'].forEach((x, i) => {
+    if (i % 2 === 0) { const g = document.getElementById(x); if (g) g.classList.remove('valid','invalid'); }
+    else { const e = document.getElementById(x); if (e) { e.value = ''; if (e.tagName==='SELECT') e.classList.remove('gja','gnee'); } }
   });
   openOv('pop-l2o');
-}
-function confirmL2O(){
-  if(!vform([['pl-loc','fg-pl-loc'],['pl-gem','fg-pl-gem'],['pl-ld','fg-pl-ld']]))return;
-  var loc=gv('pl-loc'),gem=gv('pl-gem'),ld=gv('pl-ld'),ids=ppSt.bulk?ppSt.ids:[ppSt.id];
-  ids.forEach(function(id){
-    var it=inv.leverancier.find(function(i){return i.id==id;});if(!it)return;
-    if(curUser==='side'){
-      pushNotif('Afroep door Gebruiker 002: '+it.commissie+' / '+it.asset+' ('+it.product+') — Locatie: '+loc+', Gemonteerd: '+gem+', Leverdatum: '+fmtD(ld));
-    }
-    inv.leverancier=inv.leverancier.filter(function(i){return i.id!=id;});
-    inv.onsite.push({id:nid(),commissie:it.commissie,asset:it.asset,product:it.product,location:loc,gemonteerd:gem,leverdatum:ld,fotos:it.fotos||[]});
+};
+window.confirmL2O = function() {
+  if (!vform([['pl-loc','fg-pl-loc'],['pl-gem','fg-pl-gem'],['pl-ld','fg-pl-ld']])) return;
+  const loc = gv('pl-loc'), gem = gv('pl-gem'), ld = gv('pl-ld'), ids = ppSt.bulk ? ppSt.ids : [ppSt.id];
+  ids.forEach(id => {
+    const it = inv.leverancier.find(i => i.id == id); if (!it) return;
+    if (curUser === 'side') pushNotif(`Afroep door Gebruiker 002: ${it.commissie} / ${it.asset} (${it.product}) — Locatie: ${loc}, Gemonteerd: ${gem}, Leverdatum: ${fmtD(ld)}`);
+    inv.leverancier = inv.leverancier.filter(i => i.id != id);
+    inv.onsite.push({ id: nid(), commissie: it.commissie, asset: it.asset, product: it.product, location: loc, gemonteerd: gem, leverdatum: ld, fotos: it.fotos || [] });
   });
-  clPop('pop-l2o');saveP();
-}
+  clPop('pop-l2o'); saveP();
+};
 
-function trigO2L(id){
-  if(curUser!=='main')return;
-  ppSt.id=id;ppSt.bulk=false;
-  rfg('fg-po-d','po-d');rfg('fg-po-r','po-r');clrFS('po-fd','po-fv');
-  var fg=document.getElementById('fg-po-f');if(fg)fg.classList.remove('valid','invalid');
+// O → L (retour)
+window.trigO2L = function(id) {
+  if (curUser !== 'main') return;
+  ppSt.id = id; ppSt.bulk = false;
+  rfg('fg-po-d','po-d'); rfg('fg-po-r','po-r'); clrFS('po-fd','po-fv');
+  const fg = document.getElementById('fg-po-f'); if (fg) fg.classList.remove('valid','invalid');
   openOv('pop-o2l');
-}
-function confirmO2L(){
-  if(!vform([['po-d','fg-po-d'],['po-r','fg-po-r']])||!vfoto('po-fd','fg-po-f'))return;
-  var datum=gv('po-d'),retour=gv('po-r'),fotos=[].concat(fdata['po-fd']),ids=ppSt.bulk?ppSt.ids:[ppSt.id];
-  ids.forEach(function(id){
-    var it=inv.onsite.find(function(i){return i.id==id;});if(!it)return;
-    inv.onsite=inv.onsite.filter(function(i){return i.id!=id;});
-    inv.leverancier.push({id:nid(),commissie:it.commissie,asset:it.asset,product:it.product,address:it.location||'',datum:datum,retour:retour,fotos:fotos});
+};
+window.confirmO2L = function() {
+  if (!vform([['po-d','fg-po-d'],['po-r','fg-po-r']]) || !vfoto('po-fd','fg-po-f')) return;
+  const datum = gv('po-d'), retour = gv('po-r'), fotos = [...fdata['po-fd']], ids = ppSt.bulk ? ppSt.ids : [ppSt.id];
+  ids.forEach(id => {
+    const it = inv.onsite.find(i => i.id == id); if (!it) return;
+    inv.onsite = inv.onsite.filter(i => i.id != id);
+    inv.leverancier.push({ id: nid(), commissie: it.commissie, asset: it.asset, product: it.product, address: it.location || '', datum, retour, fotos });
   });
-  clPop('pop-o2l');saveP();
-}
+  clPop('pop-o2l'); saveP();
+};
 
 // ── BULK ──────────────────────────────────────────────────
-function bulkNext(tab){
-  var sel=inv[tab].filter(function(i){return i.sel;});if(!sel.length)return;
-  ppSt.bulk=true;ppSt.ids=sel.map(function(i){return i.id;});
-  if(tab==='besteld'){rfg('fg-pb2l','pb2l-d');openOv('pop-b2l');}
-  else if(tab==='leverancier')trigL2O(-1);
-}
-function bulkPrev(tab){
-  var sel=inv[tab].filter(function(i){return i.sel;});if(!sel.length)return;
-  if(tab==='leverancier'){
-    sel.forEach(function(it){
-      inv.leverancier=inv.leverancier.filter(function(i){return i.id!==it.id;});
-      inv.besteld.push({id:nid(),commissie:it.commissie,asset:it.asset,product:it.product,address:it.address||'',date:it.datum||'',fotos:it.fotos||[]});
-    });
-    clearSel('leverancier');saveP();
-  }else if(tab==='onsite'){
-    ppSt.bulk=true;ppSt.ids=sel.map(function(i){return i.id;});
-    rfg('fg-po-d','po-d');rfg('fg-po-r','po-r');clrFS('po-fd','po-fv');
-    var fg=document.getElementById('fg-po-f');if(fg)fg.classList.remove('valid','invalid');
+window.bulkNext = function(tab) {
+  const sel = inv[tab].filter(i => i.sel); if (!sel.length) return;
+  ppSt.bulk = true; ppSt.ids = sel.map(i => i.id);
+  if (tab === 'besteld')     { rfg('fg-pb2l','pb2l-d'); openOv('pop-b2l'); }
+  else if (tab === 'leverancier') window.trigL2O(-1);
+};
+window.bulkPrev = function(tab) {
+  const sel = inv[tab].filter(i => i.sel); if (!sel.length) return;
+  if (tab === 'leverancier') {
+    sel.forEach(it => { inv.leverancier = inv.leverancier.filter(i => i.id !== it.id); inv.besteld.push({ id: nid(), commissie: it.commissie, asset: it.asset, product: it.product, address: it.address || '', date: it.datum || '', fotos: it.fotos || [] }); });
+    clearSel('leverancier'); saveP();
+  } else if (tab === 'onsite') {
+    ppSt.bulk = true; ppSt.ids = sel.map(i => i.id);
+    rfg('fg-po-d','po-d'); rfg('fg-po-r','po-r'); clrFS('po-fd','po-fv');
+    const fg = document.getElementById('fg-po-f'); if (fg) fg.classList.remove('valid','invalid');
     openOv('pop-o2l');
   }
-}
-function bulkDel(tab){
-  var cnt=inv[tab].filter(function(i){return i.sel;}).length;
-  if(!cnt||!confirm('Verwijder '+cnt+' items?'))return;
-  inv[tab]=inv[tab].filter(function(i){return!i.sel;});
-  saveP();renderTab(tab);updBB(tab);
-}
+};
+window.bulkDel = function(tab) {
+  const cnt = inv[tab].filter(i => i.sel).length;
+  if (!cnt || !confirm(`Verwijder ${cnt} items?`)) return;
+  inv[tab] = inv[tab].filter(i => !i.sel); saveP(); renderTab(tab); updBB(tab);
+};
 
 // ── SELECT ────────────────────────────────────────────────
-function togS(tab,id,checked){var it=inv[tab].find(function(i){return i.id==id;});if(it){it.sel=checked;renderTab(tab);updBB(tab);}}
-function selAll(tab,checked){inv[tab].forEach(function(i){i.sel=checked;});renderTab(tab);updBB(tab);}
-function clearSel(tab){inv[tab].forEach(function(i){i.sel=false;});renderTab(tab);updBB(tab);}
-function updBB(tab){
-  var cnt=inv[tab].filter(function(i){return i.sel;}).length;
-  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
-  document.getElementById('cnt-'+sfx).textContent=cnt;
-  var bar=document.getElementById('bb-'+sfx);
-  if(cnt>0)bar.classList.add('on');else bar.classList.remove('on');
+window.togS = function(tab, id, checked) { const it = inv[tab].find(i => i.id == id); if (it) { it.sel = checked; renderTab(tab); updBB(tab); } };
+window.selAll = function(tab, checked) { inv[tab].forEach(i => i.sel = checked); renderTab(tab); updBB(tab); };
+window.clearSel = function(tab) { inv[tab].forEach(i => i.sel = false); renderTab(tab); updBB(tab); };
+function updBB(tab) {
+  const cnt = inv[tab].filter(i => i.sel).length;
+  const sfx = tab === 'besteld' ? 'b' : (tab === 'leverancier' ? 'l' : 'o');
+  document.getElementById('cnt-'+sfx).textContent = cnt;
+  const bar = document.getElementById('bb-'+sfx);
+  if (cnt > 0) bar.classList.add('on'); else bar.classList.remove('on');
 }
 
 // ── FILTERS ───────────────────────────────────────────────
-function flt(tab,col,val){
-  if(val.trim()==='')delete flts[tab][col];else flts[tab][col]=val.toLowerCase();
-  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
-  var fs=document.getElementById('fst-'+sfx);
-  if(Object.keys(flts[tab]).length)fs.classList.add('on');else fs.classList.remove('on');
+window.flt = function(tab, col, val) {
+  if (val.trim() === '') delete flts[tab][col]; else flts[tab][col] = val.toLowerCase();
+  const sfx = tab === 'besteld' ? 'b' : (tab === 'leverancier' ? 'l' : 'o');
+  const fs = document.getElementById('fst-'+sfx);
+  if (Object.keys(flts[tab]).length) fs.classList.add('on'); else fs.classList.remove('on');
   renderTab(tab);
-}
-function clrF(tab){
-  flts[tab]={};
-  document.querySelectorAll('#tc-'+tab+' .fr input').forEach(function(i){i.value='';});
-  var sfx=tab==='besteld'?'b':(tab==='leverancier'?'l':'o');
-  document.getElementById('fst-'+sfx).classList.remove('on');renderTab(tab);
-}
+};
+window.clrF = function(tab) {
+  flts[tab] = {};
+  document.querySelectorAll('#tc-'+tab+' .fr input').forEach(i => i.value = '');
+  const sfx = tab === 'besteld' ? 'b' : (tab === 'leverancier' ? 'l' : 'o');
+  document.getElementById('fst-'+sfx).classList.remove('on'); renderTab(tab);
+};
 
-// ── CTX MENU ──────────────────────────────────────────────
-function showCtx(e,id,tab){
-  e.preventDefault();e.stopPropagation();ctxSt={id:id,tab:tab};
-  var m=document.getElementById('ctx');m.style.left=e.pageX+'px';m.style.top=e.pageY+'px';m.classList.add('on');
-}
-function ctxDo(a){
-  var id=ctxSt.id,tab=ctxSt.tab;
-  document.getElementById('ctx').classList.remove('on');
-  if(a==='edit'){openEdit(tab,id);}
-  else if(a==='del'){inv[tab]=inv[tab].filter(function(i){return i.id!=id;});saveP();}
-  else if(a==='back'){
-    if(tab==='leverancier'){var it=inv.leverancier.find(function(i){return i.id==id;});if(!it)return;inv.leverancier=inv.leverancier.filter(function(i){return i.id!=id;});inv.besteld.push({id:nid(),commissie:it.commissie,asset:it.asset,product:it.product,address:it.address||'',date:it.datum||'',fotos:it.fotos||[]});saveP();}
-    else if(tab==='onsite'){trigO2L(id);}
+// ── CONTEXT MENU ──────────────────────────────────────────
+window.showCtx = function(e, id, tab) {
+  e.preventDefault(); e.stopPropagation(); ctxSt = { id, tab };
+  const m = document.getElementById('ctx'); m.style.left = e.pageX+'px'; m.style.top = e.pageY+'px'; m.classList.add('on');
+};
+window.ctxDo = function(a) {
+  const { id, tab } = ctxSt; document.getElementById('ctx').classList.remove('on');
+  if (a === 'edit') { window.openEdit(tab, id); }
+  else if (a === 'del') { inv[tab] = inv[tab].filter(i => i.id != id); saveP(); }
+  else if (a === 'back') {
+    if (tab === 'leverancier') {
+      const it = inv.leverancier.find(i => i.id == id); if (!it) return;
+      inv.leverancier = inv.leverancier.filter(i => i.id != id);
+      inv.besteld.push({ id: nid(), commissie: it.commissie, asset: it.asset, product: it.product, address: it.address || '', date: it.datum || '', fotos: it.fotos || [] }); saveP();
+    } else if (tab === 'onsite') { window.trigO2L(id); }
   }
-  else if(a==='fwd'){if(tab==='besteld')trigB2L(id);else if(tab==='leverancier')trigL2O(id);}
-}
-document.addEventListener('click',function(){document.getElementById('ctx').classList.remove('on');});
+  else if (a === 'fwd') { if (tab === 'besteld') window.trigB2L(id); else if (tab === 'leverancier') window.trigL2O(id); }
+};
+document.addEventListener('click', () => document.getElementById('ctx').classList.remove('on'));
 
 // ── NOTIFICATIONS ─────────────────────────────────────────
-function pushNotif(msg){
-  notifs.unshift({ts:new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}),msg:msg});
+function pushNotif(msg) {
+  notifs.unshift({ ts: new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'}), msg });
   renderNotifs();
 }
-function renderNotifs(){
-  var list=document.getElementById('nlist'),badge=document.getElementById('nbadge');
-  if(!notifs.length){list.innerHTML='<div class="nempty">Geen notificaties</div>';badge.style.display='none';return;}
-  badge.style.display='block';badge.textContent=notifs.length;
-  list.innerHTML=notifs.map(function(n){return '<div class="nitem"><div class="nitem-h">Afroep melding</div><div class="nitem-s">'+n.msg+'</div><div class="nitem-s">'+n.ts+'</div></div>';}).join('');
+function renderNotifs() {
+  const list = document.getElementById('nlist'), badge = document.getElementById('nbadge');
+  if (!notifs.length) { list.innerHTML = '<div class="nempty">Geen notificaties</div>'; badge.style.display = 'none'; return; }
+  badge.style.display = 'block'; badge.textContent = notifs.length;
+  list.innerHTML = notifs.map(n => `<div class="nitem"><div class="nitem-h">Afroep melding</div><div class="nitem-s">${n.msg}</div><div class="nitem-s">${n.ts}</div></div>`).join('');
 }
-function toggleNotif(){document.getElementById('npanel').classList.toggle('open');}
-function clearNotifs(){notifs=[];renderNotifs();document.getElementById('npanel').classList.remove('open');}
-document.addEventListener('click',function(e){if(!e.target.closest('#nw-wrap')){document.getElementById('npanel').classList.remove('open');}});
+window.toggleNotif  = function() { document.getElementById('npanel').classList.toggle('open'); };
+window.clearNotifs  = function() { notifs = []; renderNotifs(); document.getElementById('npanel').classList.remove('open'); };
+document.addEventListener('click', e => { if (!e.target.closest('#nw-wrap')) document.getElementById('npanel').classList.remove('open'); });
 
-// ── FOTO MODAL ────────────────────────────────────────────
-function openFM(src){document.getElementById('fm-img').src=src;document.getElementById('fmov').classList.add('on');}
-function closeFM(){document.getElementById('fmov').classList.remove('on');}
+// ── FOTO LIGHTBOX ─────────────────────────────────────────
+window.openFM  = function(src) { document.getElementById('fm-img').src = src; document.getElementById('fmov').classList.add('on'); };
+window.closeFM = function() { document.getElementById('fmov').classList.remove('on'); };
 
-// ── HELPERS ───────────────────────────────────────────────
-function gv(id){var e=document.getElementById(id);return e?e.value.trim():'';}
-function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function nid(){return Date.now()+Math.floor(Math.random()*10000);}
-function rset(ids,grps){ids.forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});grps.forEach(function(id){var g=document.getElementById(id);if(g)g.classList.remove('valid','invalid');});}
 </script>
 </body>
 </html>
