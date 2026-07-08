@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 180">
+  <g fill="none" stroke="#4AADE4" stroke-width="14" stroke-linejoin="round" stroke-linecap="round">
+    <!-- Bottom-left triangle -->
+    <polygon points="40,160 100,40 130,100 100,100 70,160" />
+    <!-- Bottom-right triangle -->
+    <polygon points="160,160 100,40 70,100 100,100 130,160" />
+    <!-- Top connecting lines -->
+    <polygon points="100,20 30,150 60,150 100,75 140,150 170,150" />
+  </g>
+</svg>
