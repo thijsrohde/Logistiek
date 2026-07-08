@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120">
+  <!-- Valknut Symbol -->
+  <g transform="translate(10, 5) scale(0.85)">
+    <!-- Triangle 1 (top-center, pointing up) -->
+    <path d="M65 10 L15 95 L40 95 L65 52 L90 95 L115 95 Z" fill="none" stroke="#4AADE4" stroke-width="10" stroke-linejoin="round"/>
+    <!-- Triangle 2 (bottom-left, pointing up) -->
+    <path d="M35 30 L5 130 L30 130 L35 70 L60 130 L85 130 Z" fill="none" stroke="#4AADE4" stroke-width="10" stroke-linejoin="round" transform="translate(-10,15) rotate(-8, 45, 80)"/>
+    <!-- Triangle 3 (bottom-right, pointing up) -->
+    <path d="M95 30 L65 130 L90 130 L95 70 L120 130 L145 130 Z" fill="none" stroke="#4AADE4" stroke-width="10" stroke-linejoin="round" transform="translate(10,15) rotate(8, 105, 80)"/>
+  </g>
+  <!-- Company Name -->
+  <text x="160" y="62" font-family="Inter, Arial, Helvetica, sans-serif" font-weight="800" font-size="52" fill="#1a2744" letter-spacing="3">ROHDE PROJECTS</text>
+  <!-- Tagline -->
+  <text x="162" y="95" font-family="Inter, Arial, Helvetica, sans-serif" font-weight="400" font-size="18" fill="#4a5e80" letter-spacing="6">ENHANCING PROJECT RESULTS</text>
+</svg>
